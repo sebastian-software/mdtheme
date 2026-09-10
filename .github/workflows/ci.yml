@@ -76,6 +76,9 @@ jobs:
 
       - run: pnpm run --if-present test
 
+      # README belongs to markdown-themer through the explicit standards opt-in.
+      - run: pnpm readme:check
+
       # This package must work after installation, not just from workspace sources.
       - run: pnpm verify:package
 

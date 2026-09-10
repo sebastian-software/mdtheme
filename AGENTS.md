@@ -8,7 +8,8 @@ runner tests are in `test/`, and the clean packed-consumer check is in `scripts/
 
 Run `pnpm agent:check` before pushing. It includes lint, formatting, typecheck,
 build, tests, a packed consumer, and standards consistency. Keep source files
-unchanged during generation. `--check` must never write. Keep the package free
+unchanged during generation. Edit README.md.src for the project corpus and run
+`pnpm readme:write`; the generated README uses sebastian-theme. `--check` must never write. Keep the package free
 of browser dependencies and speculative plugin APIs.
 
 Compiled `dist/` is committed so consumers can pin immutable Git revisions before

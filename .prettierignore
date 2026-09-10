@@ -1,2 +1,4 @@
 # Generated consumer fixtures are verified by the Markdown renderer.
 examples/**/README.md
+# Root README is also generated and checked by markdown-themer.
+README.md

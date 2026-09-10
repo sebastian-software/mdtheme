@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@sebastian-software/standards@0.10.0': 286f483e1d161e5cdd1e2bfbf693f9c2648d5ee9c5dbb8f10a94efab23467d87
+
 importers:
 
   .:
@@ -17,7 +20,7 @@ importers:
     devDependencies:
       '@sebastian-software/standards':
         specifier: 0.10.0
-        version: 0.10.0
+        version: 0.10.0(patch_hash=286f483e1d161e5cdd1e2bfbf693f9c2648d5ee9c5dbb8f10a94efab23467d87)
       '@types/node':
         specifier: 24.12.4
         version: 24.12.4
@@ -33,6 +36,9 @@ importers:
       oxlint:
         specifier: 1.82.0
         version: 1.82.0
+      sebastian-theme:
+        specifier: github:sebastian-software/sebastian-theme#75333555ee9ee64021dc8f6d632a902de5205095
+        version: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/75333555ee9ee64021dc8f6d632a902de5205095
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -2559,6 +2565,11 @@ packages:
     resolution: {integrity: sha512-3A6sD0WYP7+QrjbfNA2FN3FsOaGGFoekCVgTyypy53gPxhbkCIjtO6YWgdrfM+n/8sI8JeXZOIxsHjMTNxQ4nQ==}
     engines: {node: ^14.0.0 || >=16.0.0}
 
+  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/75333555ee9ee64021dc8f6d632a902de5205095:
+    resolution: {gitHosted: true, integrity: sha512-C0mgtMXikmqt13+m0n0arfo07rk+JS9/WYMNSHq40xBhBjxL8MkZp1t0Viufq6zXT2y08zP9m4Aymv8BDzb8fg==, tarball: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/75333555ee9ee64021dc8f6d632a902de5205095}
+    version: 0.1.0
+    engines: {node: '>=24'}
+
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
@@ -3639,7 +3650,7 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@sebastian-software/standards@0.10.0': {}
+  '@sebastian-software/standards@0.10.0(patch_hash=286f483e1d161e5cdd1e2bfbf693f9c2648d5ee9c5dbb8f10a94efab23467d87)': {}
 
   '@sindresorhus/base62@1.0.0': {}
 
@@ -5882,6 +5893,8 @@ snapshots:
       '@eslint-community/regexpp': 4.12.2
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
+
+  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/75333555ee9ee64021dc8f6d632a902de5205095: {}
 
   semver@6.3.1: {}
 

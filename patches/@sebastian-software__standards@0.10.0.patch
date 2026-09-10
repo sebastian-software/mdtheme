@@ -1,0 +1,295 @@
+diff --git a/dist/apply.js b/dist/apply.js
+index fb6c529b05963656ddf060834b701e5b76025017..91d717005f0f1d94e62169b69b746eab39f9dc20 100644
+--- a/dist/apply.js
++++ b/dist/apply.js
+@@ -1,7 +1,8 @@
+ import { mkdirSync, writeFileSync } from "node:fs";
+ import { dirname, join } from "node:path";
+ import { upsertSection } from "./branding.js";
+-import { writeRepoMeta } from "./repo.js";
++import { markdownThemerMigrationIssues } from "./readme.js";
++import { isMarkdownThemerReadme, writeRepoMeta } from "./repo.js";
+ import { createContext, matchesPlatform, readReference, readTarget, renderSectionBody, } from "./sync.js";
+ function writeTarget(cwd, target, content) {
+     const path = join(cwd, target);
+@@ -41,6 +42,9 @@ function applySeeded(context, scope, dir) {
+ }
+ function applySections(context, scope) {
+     return scope.sections
++        .filter((section) => section.file !== "README.md" ||
++        section.marker !== "sebastian-software-branding" ||
++        !isMarkdownThemerReadme(context.meta))
+         .filter((section) => matchesPlatform(section.platform, context.meta.platform))
+         .flatMap((section) => {
+         const existing = readTarget(context, section.file) ?? "";
+@@ -57,6 +61,14 @@ function hasPlatformScopedEntries(scopes) {
+         scope.seeded.some((entry) => entry.platform !== undefined) ||
+         scope.sections.some((entry) => entry.platform !== undefined));
+ }
++function validateReadmeMigration(context) {
++    if (!isMarkdownThemerReadme(context.meta))
++        return;
++    const issues = markdownThemerMigrationIssues(context.cwd);
++    if (issues.length > 0) {
++        throw new Error(`Invalid markdown-themer README migration:\n${issues.map((issue) => `- ${issue.path}: ${issue.detail}`).join("\n")}`);
++    }
++}
+ export function runApply(cwd, currentYear, options) {
+     const context = createContext(cwd, currentYear, options?.preReadMeta);
+     // A CLI older than the repository's stamp is untrusted for the whole run, not
+@@ -69,6 +81,7 @@ export function runApply(cwd, currentYear, options) {
+         options?.explicitFromVersion !== true) {
+         return [];
+     }
++    validateReadmeMigration(context);
+     const changes = [];
+     for (const unit of context.units) {
+         for (const scope of unit.scopes) {
+diff --git a/dist/check.js b/dist/check.js
+index 19c770360752064bc670b74f24ceec3e891a2314..5399de7636a54587b4fcf364309e0e007a7ccfa5 100644
+--- a/dist/check.js
++++ b/dist/check.js
+@@ -1,4 +1,6 @@
+ import { join } from "node:path";
++import { markdownThemerMigrationIssues } from "./readme.js";
++import { isMarkdownThemerReadme } from "./repo.js";
+ import { createContext, matchesPlatform, readReference, readTarget, sectionState } from "./sync.js";
+ function checkManaged(context, scope, dir) {
+     return scope.managed
+@@ -42,6 +44,9 @@ function checkSeeded(context, scope, dir) {
+ }
+ function checkSections(context, scope) {
+     return scope.sections
++        .filter((section) => section.file !== "README.md" ||
++        section.marker !== "sebastian-software-branding" ||
++        !isMarkdownThemerReadme(context.meta))
+         .filter((section) => matchesPlatform(section.platform, context.meta.platform))
+         .flatMap((section) => {
+         const state = sectionState(context, section);
+@@ -108,6 +113,14 @@ export function runCheck(cwd, currentYear) {
+             blocking: false,
+         });
+     }
++    if (isMarkdownThemerReadme(context.meta)) {
++        findings.push(...markdownThemerMigrationIssues(cwd).map((issue) => ({
++            kind: "readme",
++            path: issue.path,
++            detail: issue.detail,
++            blocking: false,
++        })));
++    }
+     for (const unit of context.units) {
+         for (const scope of unit.scopes) {
+             findings.push(...checkManaged(context, scope, unit.dir), ...checkSeeded(context, scope, unit.dir), ...checkSections(context, scope));
+diff --git a/dist/init.js b/dist/init.js
+index 359f5a337f3d32e98db76114b6a32b11dc2e7254..31cac0b5f2726676f8d83f9364d1f43804ed513c 100644
+--- a/dist/init.js
++++ b/dist/init.js
+@@ -216,6 +216,7 @@ function carriedOver(cwd, output) {
+     return {
+         ...(existing.exceptions === undefined ? {} : { exceptions: existing.exceptions }),
+         ...(existing.workspaces === undefined ? {} : { workspaces: existing.workspaces }),
++        ...(existing.readme === undefined ? {} : { readme: existing.readme }),
+     };
+ }
+ export async function runInit(cwd, currentYear, options = {}) {
+diff --git a/dist/readme.js b/dist/readme.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..0f083073eb6a703796f175fd1ae6a2d9c2b2c3dd
+--- /dev/null
++++ b/dist/readme.js
+@@ -0,0 +1,159 @@
++import { existsSync, lstatSync, readFileSync } from "node:fs";
++import { join } from "node:path";
++export const MARKDOWN_THEMER_CONFIG_FILENAMES = [
++    "markdown-themer.config.ts",
++    "markdown-themer.config.mts",
++    "markdown-themer.config.js",
++    "markdown-themer.config.mjs",
++];
++const GENERATED_NOTICE = "<!-- This file is generated by markdown-themer. Edit README.md.src instead. -->";
++const LEGACY_BRANDING_MARKER = /<!--\s*sebastian-software-branding:(?:start|end)\s*-->/u;
++function isRecord(value) {
++    return typeof value === "object" && value !== null && !Array.isArray(value);
++}
++function regularFile(path) {
++    try {
++        const info = lstatSync(path);
++        return info.isFile();
++    }
++    catch {
++        return false;
++    }
++}
++function readUtf8(path) {
++    try {
++        return readFileSync(path, "utf8");
++    }
++    catch {
++        return undefined;
++    }
++}
++function packageScripts(cwd) {
++    const raw = readUtf8(join(cwd, "package.json"));
++    if (raw === undefined)
++        return undefined;
++    try {
++        const parsed = JSON.parse(raw);
++        if (!isRecord(parsed))
++            return undefined;
++        if (!("scripts" in parsed))
++            return {};
++        const scripts = parsed.scripts;
++        return isRecord(scripts) ? scripts : undefined;
++    }
++    catch {
++        return undefined;
++    }
++}
++function validReadmeScript(value, operation) {
++    if (typeof value !== "string")
++        return false;
++    const command = value.trim();
++    return command === `markdown-themer ${operation}` || command === `node dist/cli.js ${operation}`;
++}
++function sourceIssues(cwd) {
++    const issues = [];
++    const source = join(cwd, "README.md.src");
++    if (!regularFile(source)) {
++        issues.push({
++            path: "README.md.src",
++            detail: "markdown-themer source must be a regular non-symlink file at the repository root",
++        });
++    }
++    const sourceContent = regularFile(source) ? readUtf8(source) : undefined;
++    if (sourceContent !== undefined && LEGACY_BRANDING_MARKER.test(sourceContent)) {
++        issues.push({
++            path: "README.md.src",
++            detail: "remove the legacy sebastian-software-branding marker from README.md.src before generating README.md",
++        });
++    }
++    return issues;
++}
++function outputIssues(cwd) {
++    const issues = [];
++    const output = join(cwd, "README.md");
++    const outputIsRegular = regularFile(output);
++    const outputContent = outputIsRegular ? readUtf8(output) : undefined;
++    if (!outputIsRegular) {
++        issues.push({
++            path: "README.md",
++            detail: "markdown-themer output must be a regular non-symlink file at the repository root",
++        });
++    }
++    else if (outputContent?.split(/\r?\n/u)[0] !== GENERATED_NOTICE) {
++        issues.push({
++            path: "README.md",
++            detail: "README.md is missing the markdown-themer generated-file notice; run markdown-themer --write",
++        });
++    }
++    if (outputContent !== undefined && LEGACY_BRANDING_MARKER.test(outputContent)) {
++        issues.push({
++            path: "README.md",
++            detail: "remove the legacy sebastian-software-branding marker; markdown-themer owns README branding",
++        });
++    }
++    return issues;
++}
++function configIssues(cwd) {
++    const configs = MARKDOWN_THEMER_CONFIG_FILENAMES.filter((name) => existsSync(join(cwd, name)));
++    if (configs.length === 0) {
++        return [
++            {
++                path: "markdown-themer.config.*",
++                detail: "exactly one supported markdown-themer config is required at the repository root",
++            },
++        ];
++    }
++    if (configs.length > 1) {
++        return [
++            {
++                path: "markdown-themer.config.*",
++                detail: `multiple supported configs found (${configs.join(", ")}); keep exactly one`,
++            },
++        ];
++    }
++    const config = configs[0];
++    if (config !== undefined && regularFile(join(cwd, config)))
++        return [];
++    return [
++        {
++            path: config ?? "markdown-themer.config.*",
++            detail: "the markdown-themer config must be a regular non-symlink file",
++        },
++    ];
++}
++function packageIssues(cwd) {
++    const scripts = packageScripts(cwd);
++    if (scripts === undefined) {
++        return [
++            {
++                path: "package.json",
++                detail: "package.json with scripts is required for markdown-themer wiring",
++            },
++        ];
++    }
++    const issues = [];
++    if (!validReadmeScript(scripts["readme:write"], "--write")) {
++        issues.push({
++            path: "package.json",
++            detail: "scripts.readme:write must invoke `markdown-themer --write` or `node dist/cli.js --write`",
++        });
++    }
++    if (!validReadmeScript(scripts["readme:check"], "--check")) {
++        issues.push({
++            path: "package.json",
++            detail: "scripts.readme:check must invoke `markdown-themer --check` or `node dist/cli.js --check`",
++        });
++    }
++    return issues;
++}
++/**
++ * Check the static prerequisites for a repository that delegates README
++ * ownership to markdown-themer. This deliberately does not load the config:
++ * configuration files are trusted executable code and standards must remain a
++ * read-only checker at this boundary.
++ */
++export function markdownThemerMigrationIssues(cwd) {
++    const packageIssuesResult = packageIssues(cwd);
++    return [...sourceIssues(cwd), ...outputIssues(cwd), ...configIssues(cwd), ...packageIssuesResult];
++}
+diff --git a/dist/repo.js b/dist/repo.js
+index 3fc37d8e95e1f0a7fc7758fb43db42bb5b6cc993..e79ad29990cbc3ce0f1e5982e62cf7a1e8c7117d 100644
+--- a/dist/repo.js
++++ b/dist/repo.js
+@@ -1,12 +1,22 @@
+ import { existsSync, readFileSync, writeFileSync } from "node:fs";
+ import { join } from "node:path";
+ export const REPO_META_FILE = ".repometa.json";
++export function isMarkdownThemerReadme(meta) {
++    return meta.readme?.owner === "markdown-themer";
++}
+ export function isPlatform(value) {
+     return value === "github" || value === "forgejo";
+ }
+ function isRecord(value) {
+     return typeof value === "object" && value !== null;
+ }
++function assertReadmeOwnership(value) {
++    if (value === undefined)
++        return;
++    if (!isRecord(value) || value.owner !== "markdown-themer") {
++        throw new Error(`Invalid ${REPO_META_FILE}: readme.owner must be "markdown-themer" when present.`);
++    }
++}
+ function assertRepoMeta(value) {
+     if (!isRecord(value) ||
+         typeof value.standards !== "number" ||
+@@ -17,6 +27,7 @@ function assertRepoMeta(value) {
+     if (value.platform !== undefined && !isPlatform(value.platform)) {
+         throw new Error(`Invalid ${REPO_META_FILE}: platform must be "github" or "forgejo" when present.`);
+     }
++    assertReadmeOwnership(value.readme);
+     assertWorkspaces(value.workspaces);
+ }
+ function isWorkspacePath(value) {

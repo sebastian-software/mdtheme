@@ -54,9 +54,11 @@
     "test": "node --test test/*.test.mjs",
     "verify:package": "node scripts/verify-package.mjs",
     "standards:check": "standards check",
-    "agent:check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build && pnpm check:dist && pnpm test && pnpm verify:package && pnpm standards:check",
+    "agent:check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build && pnpm check:dist && pnpm test && pnpm readme:check && pnpm verify:package && pnpm standards:check",
     "prepack": "pnpm build",
-    "check:dist": "git diff --exit-code -- dist"
+    "check:dist": "git diff --exit-code -- dist",
+    "readme:write": "node dist/cli.js --write",
+    "readme:check": "node dist/cli.js --check"
   },
   "dependencies": {
     "jiti": "2.7.0",
@@ -69,6 +71,7 @@
     "eslint-config-setup": "0.4.0",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
+    "sebastian-theme": "github:sebastian-software/sebastian-theme#75333555ee9ee64021dc8f6d632a902de5205095",
     "typescript": "6.0.3"
   },
   "engines": {
