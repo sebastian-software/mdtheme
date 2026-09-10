@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { loadConfig } from "./config.js";
 import { checkFiles, writeFiles } from "./files.js";
-export const HELP = `Usage: markdown-themer <operation> [options]
+export const HELP = `Usage: mdtheme <operation> [options]
 
 Operations:
   --write             Render the source and atomically update README.md
@@ -88,7 +88,7 @@ async function execute(parsed, io) {
         if (drift) {
             const configOption = parsed.configPath === undefined ? "" : ` --config ${shellQuote(parsed.configPath)}`;
             io.stderr(`${config.output} is out of date.`);
-            io.stderr(`Run markdown-themer --write${configOption}.`);
+            io.stderr(`Run mdtheme --write${configOption}.`);
             return 1;
         }
         io.stdout(`${config.output} is up to date.`);
@@ -103,8 +103,8 @@ function parseOrReport(argv, io) {
         return parseArgs(argv);
     }
     catch (error) {
-        io.stderr(`markdown-themer: ${error instanceof Error ? error.message : String(error)}`);
-        io.stderr("Run markdown-themer --help for usage.");
+        io.stderr(`mdtheme: ${error instanceof Error ? error.message : String(error)}`);
+        io.stderr("Run mdtheme --help for usage.");
         return null;
     }
 }
@@ -134,7 +134,7 @@ export async function runCli(argv = process.argv.slice(2), io = {}) {
         return await execute(parsed, output);
     }
     catch (error) {
-        output.stderr(`markdown-themer: ${error instanceof Error ? error.message : String(error)}`);
+        output.stderr(`mdtheme: ${error instanceof Error ? error.message : String(error)}`);
         return 2;
     }
 }

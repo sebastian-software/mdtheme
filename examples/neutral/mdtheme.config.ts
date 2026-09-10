@@ -1,4 +1,4 @@
-import { defineConfig } from "markdown-themer";
+import { defineConfig } from "mdtheme";
 
 import { detailsFrame, noticeFrame } from "./theme-factory.ts";
 

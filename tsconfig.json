@@ -18,7 +18,7 @@
     "allowJs": true,
     "checkJs": false,
     "paths": {
-      "markdown-themer": ["./src/index.ts"]
+      "mdtheme": ["./src/index.ts"]
     },
     "allowImportingTsExtensions": true
   },

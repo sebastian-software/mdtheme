@@ -31,11 +31,11 @@ function invoke(cwd, ...args) {
   });
 }
 
-async function fixture(prefix = "markdown-themer-") {
+async function fixture(prefix = "mdtheme-") {
   const directory = await mkdtemp(join(tmpdir(), prefix));
   await writeFile(join(directory, "README.md.src"), "# Hello\n\nThis is authored prose.\n");
   await writeFile(
-    join(directory, "markdown-themer.config.ts"),
+    join(directory, "mdtheme.config.ts"),
     'export default { themes: [{ opening: "<!-- theme -->\\n", closing: "<!-- /theme -->\\n" }] };\n',
   );
   return directory;
@@ -73,17 +73,14 @@ test("same files, hardlinks, relocated sources, and invalid configs fail before 
     await writeFile(join(directory, "README.md"), "keep me\n");
     const original = await readFile(join(directory, "README.md"), "utf8");
     await writeFile(
-      join(directory, "markdown-themer.config.ts"),
+      join(directory, "mdtheme.config.ts"),
       'export default { source: "README.md", themes: [] };\n',
     );
     const sameFile = await invoke(directory, "--write");
     assert.equal(sameFile.code, 2);
     assert.equal(await readFile(join(directory, "README.md"), "utf8"), original);
 
-    await writeFile(
-      join(directory, "markdown-themer.config.ts"),
-      "export default { themes: [] };\n",
-    );
+    await writeFile(join(directory, "mdtheme.config.ts"), "export default { themes: [] };\n");
     await rm(join(directory, "README.md"));
     await link(join(directory, "README.md.src"), join(directory, "README.md"));
     const linkedOutput = await invoke(directory, "--write");
@@ -92,7 +89,7 @@ test("same files, hardlinks, relocated sources, and invalid configs fail before 
     await writeFile(join(directory, "README.md"), original);
 
     await writeFile(
-      join(directory, "markdown-themer.config.ts"),
+      join(directory, "mdtheme.config.ts"),
       'export default { source: "../README.md.src", themes: [] };\n',
     );
     const relocatedSource = await invoke(directory, "--write");
@@ -100,7 +97,7 @@ test("same files, hardlinks, relocated sources, and invalid configs fail before 
     assert.equal(await readFile(join(directory, "README.md"), "utf8"), original);
 
     await writeFile(
-      join(directory, "markdown-themer.config.ts"),
+      join(directory, "mdtheme.config.ts"),
       "export default { themes: [], unknown: true };\n",
     );
     const unknownConfig = await invoke(directory, "--write");
@@ -119,13 +116,10 @@ test("check reports absent output, discovery ambiguity, and preserves unchanged 
     const entries = await readdir(directory);
     assert.equal(entries.includes("README.md"), false);
 
-    await writeFile(
-      join(directory, "markdown-themer.config.js"),
-      "export default { themes: [] };\n",
-    );
+    await writeFile(join(directory, "mdtheme.config.js"), "export default { themes: [] };\n");
     const ambiguous = await invoke(directory, "--check");
     assert.equal(ambiguous.code, 2);
-    await rm(join(directory, "markdown-themer.config.js"));
+    await rm(join(directory, "mdtheme.config.js"));
 
     const firstWrite = await invoke(directory, "--write");
     assert.equal(firstWrite.code, 0);
@@ -143,15 +137,10 @@ test("check reports absent output, discovery ambiguity, and preserves unchanged 
 });
 
 test("an explicit config resolves source and output from its own directory", async () => {
-  const root = await mkdtemp(join(tmpdir(), "markdown-themer-"));
+  const root = await mkdtemp(join(tmpdir(), "mdtheme-"));
   const project = await fixture();
   try {
-    const result = await invoke(
-      root,
-      "--write",
-      "--config",
-      join(project, "markdown-themer.config.ts"),
-    );
+    const result = await invoke(root, "--write", "--config", join(project, "mdtheme.config.ts"));
     assert.equal(result.code, 0, result.stderr);
     const outputStat = await stat(join(project, "README.md"));
     assert.equal(outputStat.isFile(), true);
@@ -164,9 +153,9 @@ test("an explicit config resolves source and output from its own directory", asy
 });
 
 test("explicit config hints quote paths containing spaces", async () => {
-  const root = await mkdtemp(join(tmpdir(), "markdown-themer-"));
+  const root = await mkdtemp(join(tmpdir(), "mdtheme-"));
   const project = await fixture("markdown themer-");
-  const configPath = join(project, "markdown-themer.config.ts");
+  const configPath = join(project, "mdtheme.config.ts");
   try {
     const written = await invoke(root, "--write", "--config", configPath);
     assert.equal(written.code, 0, written.stderr);
@@ -174,7 +163,7 @@ test("explicit config hints quote paths containing spaces", async () => {
 
     const checked = await invoke(root, "--check", "--config", configPath);
     assert.equal(checked.code, 1);
-    assert.ok(checked.stderr.includes(`Run markdown-themer --write --config '${configPath}'.`));
+    assert.ok(checked.stderr.includes(`Run mdtheme --write --config '${configPath}'.`));
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(project, { recursive: true, force: true });
@@ -182,7 +171,7 @@ test("explicit config hints quote paths containing spaces", async () => {
 });
 
 test("explicit config hints shell quote metacharacters and apostrophes", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "markdown-themer-"));
+  const directory = await mkdtemp(join(tmpdir(), "mdtheme-"));
   try {
     const configPath = join(directory, "config-$()-it's.ts");
     await writeFile(join(directory, "README.md.src"), "# Safe\n");
@@ -190,7 +179,7 @@ test("explicit config hints shell quote metacharacters and apostrophes", async (
     const result = await invoke(directory, "--check", "--config", configPath);
     assert.equal(result.code, 1, result.stderr);
     const quoted = `'${configPath.replaceAll("'", "'\\''")}'`;
-    assert.ok(result.stderr.includes(`Run markdown-themer --write --config ${quoted}.`));
+    assert.ok(result.stderr.includes(`Run mdtheme --write --config ${quoted}.`));
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -218,7 +207,7 @@ test("output symlinks and relocated outputs are rejected", async () => {
     assert.equal(symlinkResult.code, 2);
     await rm(join(directory, "README.md"));
     await writeFile(
-      join(directory, "markdown-themer.config.ts"),
+      join(directory, "mdtheme.config.ts"),
       'export default { output: "other/README.md", themes: [] };\n',
     );
     const relocated = await invoke(directory, "--write");
@@ -229,11 +218,11 @@ test("output symlinks and relocated outputs are rejected", async () => {
 });
 
 test("operation parsing and help/version have the documented exit contract", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "markdown-themer-"));
+  const directory = await mkdtemp(join(tmpdir(), "mdtheme-"));
   try {
     const help = await invoke(directory, "--help");
     assert.equal(help.code, 0);
-    assert.match(help.stdout, /Usage: markdown-themer/);
+    assert.match(help.stdout, /Usage: mdtheme/);
     const version = await invoke(directory, "--version");
     assert.equal(version.code, 0);
     assert.match(version.stdout.trim(), /^\d+\.\d+\.\d+/);
@@ -242,7 +231,7 @@ test("operation parsing and help/version have the documented exit contract", asy
     const unknownArgument = await invoke(directory, "--nope");
     assert.equal(unknownArgument.code, 2);
 
-    const link = join(directory, "markdown-themer");
+    const link = join(directory, "mdtheme");
     await symlink(cli, link);
     const throughLink = await new Promise((resolveResult, reject) => {
       const child = spawn(process.execPath, [link, "--version"], {

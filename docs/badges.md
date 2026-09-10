@@ -5,7 +5,7 @@ local manifests and returns ordinary opening/closing Markdown fragments; it
 does not contact a registry or inspect the network.
 
 ```ts
-import { defineConfig, projectBadges } from "markdown-themer";
+import { defineConfig, projectBadges } from "mdtheme";
 
 export default defineConfig({
   themes: [projectBadges(import.meta.url, { published: false })],

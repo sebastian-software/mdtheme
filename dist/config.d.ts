@@ -1,5 +1,5 @@
 import type { Config, MarkdownFrame } from "./core.js";
-export declare const CONFIG_FILENAMES: readonly ["markdown-themer.config.ts", "markdown-themer.config.mts", "markdown-themer.config.js", "markdown-themer.config.mjs"];
+export declare const CONFIG_FILENAMES: readonly ["mdtheme.config.ts", "mdtheme.config.mts", "mdtheme.config.js", "mdtheme.config.mjs"];
 export type ResolvedConfig = {
     readonly source: string;
     readonly output: string;

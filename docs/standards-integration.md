@@ -19,3 +19,8 @@ When a standards release includes PR #81, update the exact dependency pin,
 remove its `patchedDependencies` entry and the corresponding patch file, refresh
 the lockfile, and run the full repository gate. Keep the `readme.owner` opt-in
 and README check scripts. Do not remove the bridge while pinned to 0.10.0.
+
+The local `mdtheme` rename also updates the patch's config filenames, CLI commands,
+and generated-file notice. The `markdown-themer` ownership identifier remains
+unchanged for compatibility. These rename adjustments are not part of the
+original upstream patch.

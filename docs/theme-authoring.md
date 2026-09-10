@@ -14,7 +14,7 @@ frame boundaries; theme code does not transform the source document. A factory
 is simply a function that returns a frame:
 
 ```ts
-import type { MarkdownFrame } from "markdown-themer";
+import type { MarkdownFrame } from "mdtheme";
 
 export function noticeFrame(label: string): MarkdownFrame {
   return {
@@ -58,7 +58,7 @@ This repository includes small, dependency-free factories in
 [`examples/neutral/theme-factory.ts`](../examples/neutral/theme-factory.ts):
 
 ```ts
-import { defineConfig } from "markdown-themer";
+import { defineConfig } from "mdtheme";
 import { detailsFrame, noticeFrame } from "./theme-factory.ts";
 
 export default defineConfig({
@@ -75,7 +75,7 @@ the Markdown or HTML framing that its renderer supports.
 The direct API is convenient for a focused test:
 
 ```ts
-import { renderMarkdown } from "markdown-themer";
+import { renderMarkdown } from "mdtheme";
 import { noticeFrame } from "./theme-factory.ts";
 
 const result = await renderMarkdown("# Heading\n", [noticeFrame("Example")]);

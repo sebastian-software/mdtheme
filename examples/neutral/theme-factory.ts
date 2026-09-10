@@ -1,4 +1,4 @@
-import type { MarkdownFrame } from "markdown-themer";
+import type { MarkdownFrame } from "mdtheme";
 
 export function detailsFrame(summary: string): MarkdownFrame {
   return {

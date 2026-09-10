@@ -1,34 +1,19 @@
 # Usage
 
-`markdown-themer` keeps an authored Markdown source separate from the output
+`mdtheme` keeps an authored Markdown source separate from the output
 file that a repository publishes. The default pair is `README.md.src` and
 `README.md`; both names can be set in a config.
 
-## Install from source or a tarball
+## Install
 
-The package requires Node.js 24 or newer. Until it is published to npm, install
-it from a checked-out repository or a packed artifact:
-
-```sh
-git clone https://github.com/sebastian-software/markdown-themer.git
-cd markdown-themer
-pnpm install
-pnpm build
-cd /path/to/consumer
-npm install --save-dev /path/to/markdown-themer
-```
-
-For a tarball, run `npm pack` in the repository, then install the resulting file
-from the consumer project:
+The package requires Node.js 24 or newer.
 
 ```sh
-cd /path/to/markdown-themer
-npm pack
-cd /path/to/consumer
-npm install --save-dev /path/to/markdown-themer/markdown-themer-0.1.0.tgz
+npm install --save-dev mdtheme
 ```
 
-A published package can later be installed with its package name.
+For a local checkout, run `pnpm install` and `npm pack`, then install the
+resulting `mdtheme-0.1.0.tgz` from the consumer project.
 
 ## A project config
 
@@ -37,8 +22,8 @@ functions from files in the project and return the public `MarkdownFrame`
 values:
 
 ```ts
-// markdown-themer.config.ts
-import { defineConfig } from "markdown-themer";
+// mdtheme.config.ts
+import { defineConfig } from "mdtheme";
 import { noticeFrame } from "./themes.ts";
 
 export default defineConfig({
@@ -52,10 +37,10 @@ export default defineConfig({
 provided, the CLI discovers one of these names in the current directory:
 
 ```text
-markdown-themer.config.ts
-markdown-themer.config.mts
-markdown-themer.config.js
-markdown-themer.config.mjs
+mdtheme.config.ts
+mdtheme.config.mts
+mdtheme.config.js
+mdtheme.config.mjs
 ```
 
 Multiple discovered configs are an error. `--config PATH` selects one config
@@ -82,7 +67,7 @@ early validation.
 Run the writer from the project directory:
 
 ```sh
-npx markdown-themer --write
+npx mdtheme --write
 ```
 
 The command reads the source, applies frames, formats the complete Markdown,
@@ -93,7 +78,7 @@ untouched.
 Use check mode in CI and in a pre-merge check:
 
 ```sh
-npx markdown-themer --check
+npx mdtheme --check
 ```
 
 Check mode never writes. Its exit statuses are:
@@ -116,8 +101,8 @@ the same bytes.
 For a build script that already has the source text, use the package root:
 
 ```ts
-import { renderMarkdown } from "markdown-themer";
-import type { MarkdownFrame } from "markdown-themer";
+import { renderMarkdown } from "mdtheme";
+import type { MarkdownFrame } from "mdtheme";
 
 const frames: readonly MarkdownFrame[] = [{ opening: "<section>\n", closing: "\n</section>\n" }];
 
@@ -142,8 +127,8 @@ factories.
 ```json
 {
   "scripts": {
-    "readme:write": "markdown-themer --write",
-    "readme:check": "markdown-themer --check"
+    "readme:write": "mdtheme --write",
+    "readme:check": "mdtheme --check"
   }
 }
 ```

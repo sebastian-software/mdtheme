@@ -1,5 +1,15 @@
 {
   "version": "0.2",
   "ignorePaths": [".standards/"],
-  "words": ["forgejo", "lockfile", "oxfmt", "oxlint", "pnpm", "repometa", "themer", "jiti"]
+  "words": [
+    "forgejo",
+    "lockfile",
+    "oxfmt",
+    "oxlint",
+    "pnpm",
+    "repometa",
+    "themer",
+    "jiti",
+    "mdtheme"
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "markdown-themer",
+  "name": "mdtheme",
   "version": "0.1.0",
   "description": "Compose Markdown documents with reusable brand frames and check generated READMEs for drift.",
   "keywords": [
@@ -9,9 +9,9 @@
     "readme",
     "theming"
   ],
-  "homepage": "https://github.com/sebastian-software/markdown-themer#readme",
+  "homepage": "https://github.com/sebastian-software/mdtheme#readme",
   "bugs": {
-    "url": "https://github.com/sebastian-software/markdown-themer/issues"
+    "url": "https://github.com/sebastian-software/mdtheme/issues"
   },
   "license": "MIT",
   "author": {
@@ -20,10 +20,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sebastian-software/markdown-themer.git"
+    "url": "git+https://github.com/sebastian-software/mdtheme.git"
   },
   "bin": {
-    "markdown-themer": "./dist/cli.js"
+    "mdtheme": "dist/cli.js"
   },
   "files": [
     "dist",

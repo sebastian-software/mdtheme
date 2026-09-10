@@ -6,8 +6,8 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const packageRoot = process.cwd();
-const offline = process.env.MARKDOWN_THEMER_VERIFY_OFFLINE === "1";
-const suppliedNpmCache = process.env.MARKDOWN_THEMER_VERIFY_NPM_CACHE;
+const offline = process.env.MDTHEME_VERIFY_OFFLINE === "1";
+const suppliedNpmCache = process.env.MDTHEME_VERIFY_NPM_CACHE;
 
 async function run(command, args, options) {
   const { cwd, expectedCodes = [0] } = options;
@@ -62,8 +62,8 @@ function packFilename(stdout) {
   throw new Error(`npm pack did not return a tarball filename:\n${stdout}`);
 }
 
-const scratchRoot = await mkdtemp(join(tmpdir(), "markdown-themer-verify-"));
-const packRoot = await mkdtemp(join(tmpdir(), "markdown-themer-pack-"));
+const scratchRoot = await mkdtemp(join(tmpdir(), "mdtheme-verify-"));
+const packRoot = await mkdtemp(join(tmpdir(), "mdtheme-pack-"));
 const npmCache = suppliedNpmCache ?? (offline ? undefined : join(scratchRoot, ".npm-cache"));
 
 try {
@@ -78,9 +78,9 @@ try {
     JSON.stringify(
       {
         engines: { node: ">=24" },
-        name: "markdown-themer-badge-consumer",
+        name: "mdtheme-badge-consumer",
         packageManager: "pnpm@11.25.0",
-        repository: "https://github.com/example/markdown-themer-badge-consumer",
+        repository: "https://github.com/example/mdtheme-badge-consumer",
         type: "module",
         version: "1.2.3",
       },
@@ -95,11 +95,11 @@ try {
 
   await writeFile(
     join(scratchRoot, "theme-factory.ts"),
-    `import type { MarkdownFrame } from "markdown-themer";\n\nexport function noticeFrame(label: string): MarkdownFrame {\n  return {\n    opening: \`> **\${label}**\\n>\\n\`,\n    closing: "\\n",\n  };\n}\n`,
+    `import type { MarkdownFrame } from "mdtheme";\n\nexport function noticeFrame(label: string): MarkdownFrame {\n  return {\n    opening: \`> **\${label}**\\n>\\n\`,\n    closing: "\\n",\n  };\n}\n`,
   );
   await writeFile(
-    join(scratchRoot, "markdown-themer.config.ts"),
-    `import { defineConfig } from "markdown-themer";\nimport { noticeFrame } from "./theme-factory.ts";\n\nexport default defineConfig({\n  source: "README.md.src",\n  output: "README.md",\n  themes: [noticeFrame("Local consumer")],\n});\n`,
+    join(scratchRoot, "mdtheme.config.ts"),
+    `import { defineConfig } from "mdtheme";\nimport { noticeFrame } from "./theme-factory.ts";\n\nexport default defineConfig({\n  source: "README.md.src",\n  output: "README.md",\n  themes: [noticeFrame("Local consumer")],\n});\n`,
   );
   await writeFile(
     join(scratchRoot, "README.md.src"),
@@ -107,7 +107,7 @@ try {
   );
   await writeFile(
     join(scratchRoot, "consumer-types.ts"),
-    `import { defineConfig, projectBadges, renderMarkdown } from "markdown-themer";\nimport type { Config, MarkdownFrame } from "markdown-themer";\n\nconst frame: MarkdownFrame = { opening: "<section>\\n", closing: "\\n</section>\\n" };\nconst badges = projectBadges(import.meta.url, { published: false, packages: ["package.json"], workflow: "ci.yml" });\nconst config: Config = defineConfig({ themes: [frame, badges] });\nvoid config;\nvoid renderMarkdown("# Types\\n", [frame, badges]);\n`,
+    `import { defineConfig, projectBadges, renderMarkdown } from "mdtheme";\nimport type { Config, MarkdownFrame } from "mdtheme";\n\nconst frame: MarkdownFrame = { opening: "<section>\\n", closing: "\\n</section>\\n" };\nconst badges = projectBadges(import.meta.url, { published: false, packages: ["package.json"], workflow: "ci.yml" });\nconst config: Config = defineConfig({ themes: [frame, badges] });\nvoid config;\nvoid renderMarkdown("# Types\\n", [frame, badges]);\n`,
   );
   await writeFile(
     join(scratchRoot, "tsconfig.json"),
@@ -133,7 +133,7 @@ try {
   const apiCheck = join(scratchRoot, "api-check.mjs");
   await writeFile(
     apiCheck,
-    `import { defineConfig, projectBadges, renderMarkdown } from "markdown-themer";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }, projectBadges(import.meta.url, { published: false })] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\n`,
+    `import { defineConfig, projectBadges, renderMarkdown } from "mdtheme";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }, projectBadges(import.meta.url, { published: false })] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\n`,
   );
   await run(process.execPath, [apiCheck], { cwd: scratchRoot });
 
@@ -162,22 +162,22 @@ try {
   );
   await writeFile(
     join(badgeRoot, "theme-factory.ts"),
-    `import type { MarkdownFrame } from "markdown-themer";\n\nexport function headerFrame(): MarkdownFrame {\n  return { opening: "<!-- header -->\\n", closing: "\\n<!-- header end -->\\n" };\n}\n`,
+    `import type { MarkdownFrame } from "mdtheme";\n\nexport function headerFrame(): MarkdownFrame {\n  return { opening: "<!-- header -->\\n", closing: "\\n<!-- header end -->\\n" };\n}\n`,
   );
-  const badgeConfig = join(badgeRoot, "markdown-themer.config.ts");
+  const badgeConfig = join(badgeRoot, "mdtheme.config.ts");
   await writeFile(
     badgeConfig,
-    `import { defineConfig, projectBadges } from "markdown-themer";\nimport { headerFrame } from "./theme-factory.ts";\n\nexport default defineConfig({\n  source: "README.md.src",\n  output: "README.md",\n  themes: [headerFrame(), projectBadges(import.meta.url, { published: false, workflow: "ci.yml" })],\n});\n`,
+    `import { defineConfig, projectBadges } from "mdtheme";\nimport { headerFrame } from "./theme-factory.ts";\n\nexport default defineConfig({\n  source: "README.md.src",\n  output: "README.md",\n  themes: [headerFrame(), projectBadges(import.meta.url, { published: false, workflow: "ci.yml" })],\n});\n`,
   );
 
-  const cli = join(scratchRoot, "node_modules/.bin/markdown-themer");
+  const cli = join(scratchRoot, "node_modules/.bin/mdtheme");
   const source = join(scratchRoot, "README.md.src");
   const output = join(scratchRoot, "README.md");
   const sourceBefore = await readFile(source);
   await run(cli, ["--write"], { cwd: scratchRoot });
   const generated = await readFile(output, "utf8");
   assert(
-    generated.includes("This file is generated by markdown-themer"),
+    generated.includes("This file is generated by mdtheme"),
     "CLI output is missing the generated notice",
   );
   assert(
@@ -189,7 +189,7 @@ try {
 
   const packagedExampleConfig = join(
     scratchRoot,
-    "node_modules/markdown-themer/examples/neutral/markdown-themer.config.ts",
+    "node_modules/mdtheme/examples/neutral/mdtheme.config.ts",
   );
   await run(cli, ["--check", "--config", packagedExampleConfig], { cwd: scratchRoot });
 
@@ -267,7 +267,7 @@ try {
   await run(cli, ["--check"], { cwd: scratchRoot });
   const sourceAfter = await readFile(source);
   assert(Buffer.compare(sourceAfter, sourceBefore) === 0, "CLI write mutated the source file");
-  console.log("markdown-themer package consumer verification passed");
+  console.log("mdtheme package consumer verification passed");
 } finally {
   await Promise.all([
     rm(scratchRoot, { recursive: true, force: true }),

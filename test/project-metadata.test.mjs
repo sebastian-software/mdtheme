@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 import { discoverProject } from "../dist/project-metadata.js";
 
 async function fixture() {
-  return mkdtemp(join(tmpdir(), "markdown-themer-metadata-"));
+  return mkdtemp(join(tmpdir(), "mdtheme-metadata-"));
 }
 
 async function put(root, path, contents) {

@@ -1,4 +1,4 @@
-# Markdown Themer
+# mdtheme
 
 A Markdown-only CLI and library. Themes contribute opening and closing Markdown;
 React layouts and Ardo integration live elsewhere.
@@ -12,8 +12,7 @@ unchanged during generation. Edit README.md.src for the project corpus and run
 `pnpm readme:write`; the generated README uses sebastian-theme. `--check` must never write. Keep the package free
 of browser dependencies and speculative plugin APIs.
 
-Compiled `dist/` is committed so consumers can pin immutable Git revisions before
-registry releases. Build and stage it with source changes; CI detects stale output.
+Compiled `dist/` remains committed for existing consumers of immutable Git revisions. Build and stage it with source changes; CI detects stale output.
 Do not add a prepare lifecycle. Package and CLI changes require verifying the
 packed artifact, not only workspace imports.
 

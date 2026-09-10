@@ -13,7 +13,7 @@ async function fixture({
   unusual = false,
   rustRuntime = "1.80-beta",
 } = {}) {
-  const root = await mkdtemp(join(tmpdir(), "markdown-themer-badges-"));
+  const root = await mkdtemp(join(tmpdir(), "mdtheme-badges-"));
   await mkdir(join(root, ".github", "workflows"), { recursive: true });
   await writeFile(
     join(root, "package.json"),
@@ -89,7 +89,7 @@ test("discovers registry, CI, and runtime badges in the documented order", async
 test("can hide published badges while retaining CI and runtimes", async () => {
   const root = await fixture();
   try {
-    const frame = projectBadges(pathToFileURL(join(root, "markdown-themer.config.mjs")), {
+    const frame = projectBadges(pathToFileURL(join(root, "mdtheme.config.mjs")), {
       published: false,
     });
     assert.equal(frame.opening.includes("/npm/v/"), false);

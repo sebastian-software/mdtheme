@@ -3,10 +3,10 @@ import { existsSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { defineConfig } from "./core.js";
 export const CONFIG_FILENAMES = [
-    "markdown-themer.config.ts",
-    "markdown-themer.config.mts",
-    "markdown-themer.config.js",
-    "markdown-themer.config.mjs",
+    "mdtheme.config.ts",
+    "mdtheme.config.mts",
+    "mdtheme.config.js",
+    "mdtheme.config.mjs",
 ];
 function isRecord(value) {
     return typeof value === "object" && value !== null;
@@ -19,10 +19,10 @@ export function resolveConfig(config, configDir, configPath) {
     const source = resolvePath(checked.source ?? "README.md.src", configDir);
     const output = resolvePath(checked.output ?? "README.md", configDir);
     if (basename(output) !== "README.md") {
-        throw new TypeError("Invalid markdown-themer config: output must be the root README.md file");
+        throw new TypeError("Invalid mdtheme config: output must be the root README.md file");
     }
     if (dirname(source) !== configDir || dirname(output) !== configDir) {
-        throw new TypeError("Invalid markdown-themer config: source and output must be files in the config directory");
+        throw new TypeError("Invalid mdtheme config: source and output must be files in the config directory");
     }
     return {
         source,
@@ -37,7 +37,7 @@ export function discoverConfig(cwd = process.cwd()) {
     // could modify the output. The actual config module is loaded asynchronously below.
     const found = CONFIG_FILENAMES.filter((name) => existsSync(resolve(cwd, name)));
     if (found.length > 1) {
-        throw new Error(`Multiple markdown-themer config files found: ${found.join(", ")}`);
+        throw new Error(`Multiple mdtheme config files found: ${found.join(", ")}`);
     }
     const first = found[0];
     return found.length === 1 && first !== undefined ? resolve(cwd, first) : undefined;

@@ -1,6 +1,6 @@
-# markdown-themer
+# mdtheme
 
-`markdown-themer` turns a Markdown source document into a checked, consistently
+`mdtheme` turns a Markdown source document into a checked, consistently
 formatted output file. It is useful when a repository keeps an authored
 `README.md.src` and wants `README.md` to be reproducible in local development
 and CI.
@@ -17,50 +17,27 @@ runtime, CI, and project registry badges from local package manifests. Use
 
 ## Install
 
-The package requires Node.js 24 or newer. It is currently consumed from its
-source repository, a local checkout, or a tarball rather than from npm:
+The package requires Node.js 24 or newer.
 
 ```sh
-git clone https://github.com/sebastian-software/markdown-themer.git
-cd markdown-themer
+npm install --save-dev mdtheme
+```
+
+For a local checkout, build and pack it first, then install the generated tarball:
+
+```sh
 pnpm install
-pnpm build
-cd /path/to/consumer
-npm install --save-dev /path/to/markdown-themer
-```
-
-To install a packed artifact, run `npm pack` in the checked-out repository,
-then install the resulting `.tgz` file from the consumer project:
-
-```sh
-cd /path/to/markdown-themer
 npm pack
-cd /path/to/consumer
-npm install --save-dev /path/to/markdown-themer/markdown-themer-0.1.0.tgz
+npm install --save-dev /path/to/checkout/mdtheme-0.1.0.tgz
 ```
-
-For a committed Git dependency, pin the repository revision explicitly:
-
-```json
-{
-  "devDependencies": {
-    "markdown-themer": "git+https://github.com/sebastian-software/markdown-themer.git#<markdown-themer-commit>"
-  }
-}
-```
-
-Replace the placeholder with the immutable commit selected for the
-integration. The repository commits its built `dist/` files and does not rely
-on a `prepare` lifecycle script. When the package is published, the same
-dependency can be installed by name.
 
 ## Quick start
 
 Create `README.md.src` with the Markdown you want to edit. Add a local config:
 
 ```ts
-// markdown-themer.config.ts
-import { defineConfig } from "markdown-themer";
+// mdtheme.config.ts
+import { defineConfig } from "mdtheme";
 import { detailsFrame } from "./theme-factory.ts";
 
 export default defineConfig({
@@ -74,7 +51,7 @@ Factories are ordinary local TypeScript functions. For example:
 
 ```ts
 // theme-factory.ts
-import type { MarkdownFrame } from "markdown-themer";
+import type { MarkdownFrame } from "mdtheme";
 
 export function detailsFrame(summary: string): MarkdownFrame {
   return {
@@ -87,8 +64,8 @@ export function detailsFrame(summary: string): MarkdownFrame {
 Generate the output and then check it in CI:
 
 ```sh
-pnpm exec markdown-themer --write
-pnpm exec markdown-themer --check
+pnpm exec mdtheme --write
+pnpm exec mdtheme --check
 ```
 
 Edit `README.md.src`; do not edit generated `README.md` by hand. The write
@@ -98,14 +75,14 @@ operation is read-only and exits with status 1 when the output is out of date.
 ## CLI
 
 ```text
-markdown-themer --write [--config PATH]
-markdown-themer --check [--config PATH]
-markdown-themer --help
-markdown-themer --version
+mdtheme --write [--config PATH]
+mdtheme --check [--config PATH]
+mdtheme --help
+mdtheme --version
 ```
 
 With no `--config`, the CLI looks in the current directory for one of
-`markdown-themer.config.ts`, `.mts`, `.js`, or `.mjs`. Pass an explicit path
+`mdtheme.config.ts`, `.mts`, `.js`, or `.mjs`. Pass an explicit path
 when the config lives elsewhere. Source and output paths in a config resolve
 from the config file's directory.
 
@@ -120,8 +97,8 @@ repository and review them like any other build script.
 The public API is deliberately small:
 
 ```ts
-import { defineConfig, renderMarkdown } from "markdown-themer";
-import type { MarkdownFrame } from "markdown-themer";
+import { defineConfig, renderMarkdown } from "mdtheme";
+import type { MarkdownFrame } from "mdtheme";
 ```
 
 `renderMarkdown(source, themes)` receives Markdown text and returns the framed
@@ -139,7 +116,7 @@ plain string factories.
 This repository uses its own CLI with
 [`sebastian-theme`](https://github.com/sebastian-software/sebastian-theme).
 Edit [`README.md.src`](README.md.src), then run `pnpm readme:write`.
-The [repository config](markdown-themer.config.ts) selects the company frame;
+The [repository config](mdtheme.config.ts) selects the company frame;
 `pnpm readme:check` verifies the committed result in CI.
 
 ## More documentation
