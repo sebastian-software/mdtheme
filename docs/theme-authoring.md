@@ -43,9 +43,11 @@ An empty `opening` or `closing` is valid. Include deliberate newlines at the
 boundary so the source's first heading and last paragraph remain valid Markdown
 inside the frame. The renderer supplies blank-line section boundaries between
 nonempty frame parts and the source; indentation and newlines that belong
-inside your Markdown or HTML fragment remain the factory's responsibility. Keep
-a source's final newline in the source file; the formatter normalizes the
-complete result.
+inside your Markdown or HTML fragment remain the factory's responsibility.
+Source and frame text are preserved, including line endings and trailing
+whitespace. The renderer adds LF line breaks only where section boundaries
+need them; it does not normalize line endings or add a final newline. Include
+a final newline in your source or last closing fragment if you want one.
 
 HTML wrappers should be valid around the Markdown they contain. A wrapper that
 opens a raw HTML block and never closes it can change how a renderer treats all

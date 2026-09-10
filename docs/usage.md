@@ -73,10 +73,13 @@ Run the writer from the project directory:
 npx mdtheme --write
 ```
 
-The command reads the source, applies frames, formats the complete Markdown,
-and atomically updates the output. It validates paths before writing, including
+The command reads the source, applies frames, and atomically updates the output. It validates paths before writing, including
 the source and output being the same file or hard link. The source remains
-untouched.
+untouched. Source and frame text retain their authored formatting, including
+line endings, indentation, and trailing whitespace. The tool adds a generated
+notice and blank lines between sections; it does not parse or format Markdown.
+If you use a formatter, run it on the source before generation. Formatting the
+generated output separately can make `--check` report drift.
 
 Use check mode in CI and in a pre-merge check:
 

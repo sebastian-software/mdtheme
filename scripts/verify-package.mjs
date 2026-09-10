@@ -79,6 +79,7 @@ try {
       {
         engines: { node: ">=24" },
         name: "mdtheme-badge-consumer",
+        license: "MIT",
         packageManager: "pnpm@11.25.0",
         repository: "https://github.com/example/mdtheme-badge-consumer",
         type: "module",
@@ -103,7 +104,7 @@ try {
   );
   await writeFile(
     join(scratchRoot, "README.md.src"),
-    "# Packed consumer\n\nThis file is rendered from a local TypeScript config.\n",
+    "# Packed consumer\r\n\r\n*   Authored spacing  \r\n    and a hard line break.\r\n",
   );
   await writeFile(
     join(scratchRoot, "consumer-types.ts"),
@@ -130,10 +131,16 @@ try {
   const tsc = resolve(packageRoot, "node_modules/.bin/tsc");
   await run(tsc, ["--project", join(scratchRoot, "tsconfig.json")], { cwd: scratchRoot });
 
+  await writeFile(
+    join(scratchRoot, "Cargo.toml"),
+    '[package]\nname = "packed-crate"\nversion = "1.0.0"\nlicense = "MIT OR Apache-2.0"\n',
+  );
+  await mkdir(join(scratchRoot, "src"));
+  await writeFile(join(scratchRoot, "src/lib.rs"), "pub fn example() {}\n");
   const apiCheck = join(scratchRoot, "api-check.mjs");
   await writeFile(
     apiCheck,
-    `import { defineConfig, projectBadges, renderMarkdown } from "mdtheme";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }, projectBadges(import.meta.url, { published: false })] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\n`,
+    `import { defineConfig, projectBadges, renderMarkdown } from "mdtheme";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }, projectBadges(import.meta.url, { published: false })] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\nconst badges = projectBadges(import.meta.url).opening;\nfor (const expected of ["/npm/dm/mdtheme-badge-consumer", "/crates/dr/packed-crate", "/docsrs/packed-crate", "License", "MIT%20OR%20Apache--2.0"]) { if (!badges.includes(expected)) throw new Error("Missing badge: " + expected); }\n`,
   );
   await run(process.execPath, [apiCheck], { cwd: scratchRoot });
 
@@ -185,6 +192,10 @@ try {
     "CLI did not load the local TypeScript theme factory",
   );
   assert(generated.includes("# Packed consumer"), "CLI output does not contain source Markdown");
+  assert(
+    generated.includes(sourceBefore.toString("utf8")),
+    "CLI output reformatted the authored source",
+  );
   await run(cli, ["--check"], { cwd: scratchRoot });
 
   const packagedExampleConfig = join(

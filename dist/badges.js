@@ -22,6 +22,33 @@ function packageBadge(item) {
     }
     return imageLink(`crates.io ${item.name}`, `${SHIELDS}/crates/v/${packagePath}.svg?style=flat&label=${encodePathPart(`crates.io: ${item.name}`)}`, `https://crates.io/crates/${packagePath}`);
 }
+function downloadBadge(item) {
+    const packagePath = encodePathPart(item.name);
+    const npm = item.registry === "npm";
+    const label = `${npm ? "npm monthly" : "crates.io recent"} downloads: ${item.name}`;
+    return imageLink(label, `${SHIELDS}/${npm ? "npm/dm" : "crates/dr"}/${packagePath}.svg?style=flat&label=${encodePathPart(label)}`, npm
+        ? `https://www.npmjs.com/package/${packagePath}`
+        : `https://crates.io/crates/${packagePath}`);
+}
+function docsBadge(item) {
+    const packagePath = encodePathPart(item.name);
+    const label = `docs.rs: ${item.name}`;
+    return imageLink(label, `${SHIELDS}/docsrs/${packagePath}?style=flat&label=${encodePathPart(label)}`, `https://docs.rs/${packagePath}`);
+}
+function licenseBadges(packages) {
+    return packages.flatMap((item) => {
+        if (item.license === undefined)
+            return [];
+        const { expression, manifest } = item.license;
+        const label = packages.length === 1 ? "License" : `License (${item.registry}: ${item.name})`;
+        return [
+            imageLink(`${label}: ${expression}`, `${SHIELDS}/badge/${encodeStaticPart(label)}-${encodeStaticPart(expression)}-${RUNTIME_COLOR}.svg?style=flat`, manifest
+                .split("/")
+                .map((part) => encodePathPart(part))
+                .join("/")),
+        ];
+    });
+}
 function workflowName(workflow) {
     const parts = workflow.split(/[\\/]/u);
     return parts.at(-1) ?? workflow;
@@ -78,22 +105,30 @@ function runtimeBadges(packages) {
         return runtimeBadge(registry, runtime, names.join(", "));
     });
 }
+function publishedBadges(packages) {
+    const badges = [];
+    for (const item of packages) {
+        const badge = packageBadge(item);
+        if (badge !== undefined)
+            badges.push(badge);
+        badges.push(downloadBadge(item));
+        if (item.registry === "crates" && item.docs === true)
+            badges.push(docsBadge(item));
+    }
+    return badges;
+}
 /** Return a deterministic Markdown badge row for the discovered project. */
 export function projectBadges(root, options) {
     const project = discoverProject(root, options?.packages);
     const badges = [];
-    if (options?.published !== false) {
-        for (const item of project.packages) {
-            const badge = packageBadge(item);
-            if (badge !== undefined)
-                badges.push(badge);
-        }
-    }
+    if (options?.published !== false)
+        badges.push(...publishedBadges(project.packages));
     const workflow = options?.workflow ?? project.workflow;
     const ci = workflowBadge(project.repository, workflow);
     if (ci !== undefined)
         badges.push(ci);
     badges.push(...runtimeBadges(project.packages));
+    badges.push(...licenseBadges(project.packages));
     return { opening: badges.join(" "), closing: "" };
 }
 //# sourceMappingURL=badges.js.map
