@@ -65,3 +65,37 @@ patch when the supporting release is available. See the
 [patch provenance and removal steps](standards-integration.md). Generated README examples
 demonstrate this tool; website composition and React components remain separate
 work.
+
+## Automated releases
+
+The workflow follows the Node product template from `sebastian-software/standards`
+v0.10.0. Conventional commits produce one Release Please PR, one changelog,
+and a tag such as `mdtheme-v0.1.1`. Merging that release PR creates the GitHub
+Release and publishes its exact tag to npm using the shared `publish-npm` action.
+Stable versions use `latest`; prerelease versions use their prerelease identifier.
+The workflow runs the complete package gate before publishing.
+
+The manifest starts at the manually published `0.1.0`. `bootstrap-sha` marks the
+commit recording that baseline; remove it after the first Release Please PR has
+been merged. No automatic publish of `0.1.0` is attempted.
+
+Configure npm Trusted Publishing for the package `mdtheme` with:
+
+- Provider: GitHub Actions
+- Organization: `sebastian-software`
+- Repository: `mdtheme`
+- Workflow filename: `publish.yml`
+- Environment: leave empty
+- Allowed action: direct `npm publish`, if npm shows that option
+
+No npm token secret is used. The publish job requests `id-token: write` and
+publishes with provenance. If a publish fails after a release is created, retry
+`publish.yml` through its manual trigger with that existing release tag. Branch
+names and arbitrary commits are rejected. A version already published to npm
+cannot be published again.
+
+Release Please uses `RELEASE_PLEASE_TOKEN` when available, otherwise the built-in
+`GITHUB_TOKEN`. The built-in token can create release PRs but does not trigger
+new CI runs on them. Use a suitable GitHub App token or PAT in
+`RELEASE_PLEASE_TOKEN` when automatic release-PR CI is required. The publishing
+job still runs the full verification gate against the release tag.
