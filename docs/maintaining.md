@@ -1,6 +1,12 @@
 # Maintaining mdtheme
 
-Use Node 24 or newer and the pinned pnpm version in `package.json`.
+Use Node.js 24 or newer and the pinned pnpm version in `package.json`.
+CI runs the complete checks on Node.js 24 and 26; releases use Node.js 24.
+
+`tsc` uses TypeScript 7. The `typescript` dependency is a compatibility alias
+for tooling that still imports the TypeScript 6 API. See the
+[compiler decision](adr/0006-use-typescript-7-with-tooling-compatibility.md)
+before removing either dependency.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -14,6 +20,13 @@ lifecycle step. Run the packed consumer after public API, CLI or export changes.
 
 Version 0.1.0 was first published manually to npm as `mdtheme`. Future releases
 are managed by Release Please through `.github/workflows/publish.yml`.
+
+## Project decisions
+
+Read the [architecture decisions](adr/README.md) before changing a project
+contract. ADRs are living documents: update the current record and its date
+when an agreed decision changes. Keep exact dependency versions in
+`package.json` and the lockfile.
 
 ## Theme dependencies
 

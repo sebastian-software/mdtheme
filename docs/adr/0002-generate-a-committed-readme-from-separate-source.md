@@ -1,5 +1,8 @@
 # Generate a committed README from a separate source
 
+- Status: accepted
+- Updated: 2026-09-10
+
 Projects edit `README.md.src` and commit the generated `README.md` so repository
 visitors can read it immediately. The write and check commands compute the same
 output from pinned theme code and deterministic Markdown formatting; CI checks

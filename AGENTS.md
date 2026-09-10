@@ -5,6 +5,8 @@ React layouts and Ardo integration live elsewhere.
 
 Use Node 24+, pnpm, TypeScript ESM, and US English. Source is in `src/`, Node test
 runner tests are in `test/`, and the clean packed-consumer check is in `scripts/`.
+CI checks Node 24 and 26. Read `docs/adr/README.md` for the living decision
+records; update the relevant ADR when an agreed project contract changes.
 
 Run `pnpm agent:check` before pushing. It includes lint, formatting, typecheck,
 build, tests, a packed consumer, and standards consistency. Keep source files
