@@ -71,7 +71,7 @@
     "eslint-config-setup": "0.4.0",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
-    "sebastian-theme": "github:sebastian-software/sebastian-theme#75333555ee9ee64021dc8f6d632a902de5205095",
+    "sebastian-theme": "github:sebastian-software/sebastian-theme#bb09dc49d01c39694b5ec0c418a1304d2cf6bff3",
     "typescript": "6.0.3"
   },
   "engines": {
