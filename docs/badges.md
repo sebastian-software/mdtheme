@@ -28,17 +28,45 @@ members/default members. Rust package metadata inherits the
 workspace `rust-version` and repository when the member opts in with
 `rust-version.workspace = true` or `repository.workspace = true`.
 
-The selected package metadata supplies version links for npm and crates.io,
-local runtime badges from supported versions, and a GitHub Actions badge from
-`ci.yml` or `ci.yaml`, otherwise the only available workflow. With several
-other workflows it omits CI until `workflow` selects one.
+The standard set appears in this order:
+
+1. For each selected published package: its registry version, downloads, and
+   docs.rs link when it is a Rust library.
+2. GitHub Actions status from `ci.yml` or `ci.yaml`, otherwise the only available
+   workflow. With several other workflows, CI is omitted until `workflow`
+   selects one.
+3. Runtime requirements from the selected package manifests.
+4. Declared package licenses, linked to their local manifests.
+
+npm downloads use the monthly count (`npm/dm`). crates.io downloads use the
+registry's recent count (`crates/dr`), labeled separately rather than implying
+both registries report the same period. Each version, download, and docs.rs
+badge names its package.
+
+A Rust library is discovered from `src/lib.rs` or an explicit `[lib].path`.
+`[lib].doc = false` suppresses its docs.rs badge. `package.autolib = false`
+disables implicit library discovery. Binary-only packages do not receive a
+docs.rs badge. Local discovery cannot verify that the published documentation
+build succeeded; the badge service supplies that status.
+
+Licenses come from string-valued `package.json` license fields and Cargo
+`package.license`, including explicit `license.workspace = true` inheritance.
+The declared expression is preserved, including dual licenses. Missing or
+empty values are omitted; npm workspace members do not inherit the root
+license implicitly. A `license-file` without a declared license expression is
+not interpreted. With multiple packages, each license badge identifies its
+registry and package, so different licenses are never presented as one
+repository-wide license.
+
+Codecov, coverage thresholds, GitHub releases, bundle sizes, and toolchain or
+platform claims are outside this standard set. Brand attribution belongs in
+the brand theme. See the [badge decision](adr/0007-use-a-fixed-project-badge-set.md).
 
 Registry image URLs are dynamic badge URLs, but the factory never checks
 whether a package has been published. The default `published: true` assumes
 the selected packages exist on their registries. Set `published: false` while
-the project is unpublished; runtime and CI badges remain available. When more
-than one package is selected, each registry badge carries its package name so
-the links remain distinguishable.
+the project is unpublished; runtime, CI, and license badges remain available.
+Version, download, and docs.rs badges are all hidden.
 
 ## Selection and exclusions
 

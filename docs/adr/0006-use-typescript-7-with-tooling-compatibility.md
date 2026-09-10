@@ -1,22 +1,22 @@
-# Use TypeScript 7 with tooling compatibility
+# Use TypeScript 6 across the development toolchain
 
 - Status: accepted
 - Updated: 2026-09-10
 
-Use the stable TypeScript 7 compiler for type checking, builds, and the packed
-consumer's declaration checks. Keep the official TypeScript 6 compatibility
-package available under the `typescript` name for tools that import the
-compiler API, including typescript-eslint.
+Use one stable TypeScript 6 dependency for type checking, builds, lint tooling,
+and the packed consumer's declaration checks. Keep the exact version in
+`package.json`. There is no native compiler dependency or compatibility alias.
 
-TypeScript 7 does not yet expose that API. Replacing the `typescript` package
-directly would break those tools. Staying entirely on TypeScript 6 would defer
-the compiler update. The official side-by-side alias setup lets the project
-update its compiler while preserving the lint pipeline.
+The earlier TypeScript 7 migration needed a separate TypeScript 6 API package
+for ESLint. For this small codebase, the compiler's performance benefit does
+not justify the additional dependency and ecosystem compatibility work.
+TypeScript 6 supports the project's language features and keeps the compiler
+and its tooling on the same implementation.
 
-`@typescript/native` supplies `tsc`; the `typescript` alias supplies the older
-API and `tsc6`. Exact versions belong in `package.json`. This adds a second
-development dependency, so remove the bridge when the lint tooling supports
-the new compiler API. Validate changes with lint, type checking, the build,
-and the installed package consumer, including generated declaration files.
+Revisit TypeScript 7 when the relevant tools support it directly or measured
+build costs justify the migration. Validate any compiler upgrade with lint,
+type checking, builds, and the installed package consumer. Review generated
+JavaScript and declarations for changes rather than assuming compatibility.
 
-See the [official side-by-side setup](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6-0).
+This living record retains its original filename so existing links remain
+valid. Git history records the previous dual-compiler decision.

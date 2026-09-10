@@ -1,8 +1,11 @@
+import type { PackageLicense } from "./project-package-details.js";
 /** A publishable package discovered from a project manifest. */
 export type PackageMetadata = {
     registry: "crates" | "npm";
     name: string;
     runtime?: string;
+    license?: PackageLicense;
+    docs?: true;
 };
 /** Public package and repository metadata used by the README theme. */
 export type ProjectMetadata = {

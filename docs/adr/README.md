@@ -17,4 +17,5 @@ configuration files; ADRs explain the constraints and tradeoffs behind them.
 - [Project language](0003-use-us-english.md)
 - [Runtime and CI support](0004-support-node-24-and-test-node-26.md)
 - [Built output for Git consumers](0005-commit-built-output-for-git-consumers.md)
-- [TypeScript compiler and tooling compatibility](0006-use-typescript-7-with-tooling-compatibility.md)
+- [TypeScript 6 development toolchain](0006-use-typescript-7-with-tooling-compatibility.md)
+- [Standard project badges](0007-use-a-fixed-project-badge-set.md)

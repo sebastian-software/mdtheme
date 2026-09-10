@@ -21,6 +21,7 @@ async function fixture({
       {
         name: unusual ? "@scope/tool]" : "@scope/tool-bar",
         version: "1.0.0",
+        license: "MIT",
         engines: { node: ">=20 <22" },
         repository: { type: "git", url: "https://github.com/acme/project).git" },
         ...(secondPackage ? { workspaces: ["packages/*"] } : {}),
@@ -31,8 +32,10 @@ async function fixture({
   );
   await writeFile(
     join(root, "Cargo.toml"),
-    `[package]\nname = "crate-tool"\nversion = "1.0.0"\nrust-version = "${rustRuntime}"\n`,
+    `[package]\nname = "crate-tool"\nversion = "1.0.0"\nrust-version = "${rustRuntime}"\nlicense = "MIT OR Apache-2.0"\n`,
   );
+  await mkdir(join(root, "src"));
+  await writeFile(join(root, "src", "lib.rs"), "pub fn example() {}\n");
   await writeFile(join(root, ".github", "workflows", "ci.yml"), "name: CI\n");
   if (secondPackage) {
     await mkdir(join(root, "packages", "other"), { recursive: true });
@@ -44,7 +47,7 @@ async function fixture({
   return root;
 }
 
-test("discovers registry, CI, and runtime badges in the documented order", async () => {
+test("discovers the standard badges in the documented order", async () => {
   const root = await fixture();
   try {
     const frame = projectBadges(root);
@@ -78,15 +81,23 @@ test("discovers registry, CI, and runtime badges in the documented order", async
 
     const npm = frame.opening.indexOf("/npm/v/");
     const crates = frame.opening.indexOf("/crates/v/");
+    const npmDownloads = frame.opening.indexOf("/npm/dm/%40scope%2Ftool-bar.svg");
+    const crateDownloads = frame.opening.indexOf("/crates/dr/crate-tool.svg");
+    const docs = frame.opening.indexOf("/docsrs/crate-tool?");
     const ci = frame.opening.indexOf("/github/actions/workflow/status/");
     const runtime = frame.opening.indexOf("/badge/");
-    assert.ok(npm < crates && crates < ci && ci < runtime);
+    assert.ok(npm < npmDownloads && npmDownloads < crates);
+    assert.ok(crates < crateDownloads && crateDownloads < docs && docs < ci && ci < runtime);
+    assert.match(frame.opening, /\]\(https:\/\/docs\.rs\/crate-tool\)/);
+    assert.match(frame.opening, /License.*MIT.*\]\(package\.json\)/);
+    assert.match(frame.opening, /MIT%20OR%20Apache--2\.0/);
+    assert.match(frame.opening, /\]\(Cargo\.toml\)/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test("can hide published badges while retaining CI and runtimes", async () => {
+test("can hide published badges while retaining CI, runtimes, and licenses", async () => {
   const root = await fixture();
   try {
     const frame = projectBadges(pathToFileURL(join(root, "mdtheme.config.mjs")), {
@@ -94,6 +105,8 @@ test("can hide published badges while retaining CI and runtimes", async () => {
     });
     assert.equal(frame.opening.includes("/npm/v/"), false);
     assert.equal(frame.opening.includes("/crates/v/"), false);
+    assert.doesNotMatch(frame.opening, /npm\/dm|crates\/dr|docs\.rs|docsrs/);
+    assert.match(frame.opening, /License/);
     assert.match(frame.opening, /github\/actions\/workflow\/status/);
     assert.match(frame.opening, /badge\/Node\.js-/);
     assert.match(frame.opening, /badge\/Rust%20MSRV-/);
@@ -153,6 +166,28 @@ test("escapes package names in Markdown labels and URLs", async () => {
     assert.match(frame.opening, /npm @scope\/tool\\\]/);
     assert.match(frame.opening, /%40scope%2Ftool%5D/);
     assert.equal(frame.opening.includes("](%40scope"), false);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("renders local license links with escaped paths and package labels", async () => {
+  const root = await fixture();
+  try {
+    await mkdir(join(root, "packages", "other (tool)"), { recursive: true });
+    await writeFile(
+      join(root, "packages", "other (tool)", "package.json"),
+      JSON.stringify({ name: "other]tool", license: "BSD-2-Clause" }),
+    );
+    const frame = projectBadges(root, {
+      packages: ["package.json", "packages/other (tool)/package.json"],
+      published: false,
+    });
+    assert.match(frame.opening, /License.*@scope\/tool-bar.*MIT/);
+    assert.match(frame.opening, /other\\\]tool/);
+    assert.match(frame.opening, /BSD--2--Clause/);
+    assert.ok(frame.opening.includes("](packages/other%20%28tool%29/package.json)"));
+    assert.doesNotMatch(frame.opening, /codecov|coverage|github\/v\/release|bundlephobia/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

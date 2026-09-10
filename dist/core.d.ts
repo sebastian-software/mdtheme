@@ -15,7 +15,7 @@ type RenderOptions = {
 /** Validate a config and return a detached normalized value. */
 export declare function defineConfig(config: Config): Config;
 /**
- * Wrap Markdown source in the configured frames and format it canonically.
+ * Wrap Markdown source in the configured frames without reformatting its text.
  * Frames are supplied outer-first; their closing fragments are emitted
  * inner-first so each frame is properly nested.
  */

@@ -49,6 +49,47 @@ function packageBadge(item: ProjectPackage): string | undefined {
   );
 }
 
+function downloadBadge(item: ProjectPackage): string {
+  const packagePath = encodePathPart(item.name);
+  const npm = item.registry === "npm";
+  const label = `${npm ? "npm monthly" : "crates.io recent"} downloads: ${item.name}`;
+  return imageLink(
+    label,
+    `${SHIELDS}/${npm ? "npm/dm" : "crates/dr"}/${packagePath}.svg?style=flat&label=${encodePathPart(label)}`,
+    npm
+      ? `https://www.npmjs.com/package/${packagePath}`
+      : `https://crates.io/crates/${packagePath}`,
+  );
+}
+
+function docsBadge(item: ProjectPackage): string {
+  const packagePath = encodePathPart(item.name);
+  const label = `docs.rs: ${item.name}`;
+  return imageLink(
+    label,
+    `${SHIELDS}/docsrs/${packagePath}?style=flat&label=${encodePathPart(label)}`,
+    `https://docs.rs/${packagePath}`,
+  );
+}
+
+function licenseBadges(packages: readonly ProjectPackage[]): string[] {
+  return packages.flatMap((item) => {
+    if (item.license === undefined) return [];
+    const { expression, manifest } = item.license;
+    const label = packages.length === 1 ? "License" : `License (${item.registry}: ${item.name})`;
+    return [
+      imageLink(
+        `${label}: ${expression}`,
+        `${SHIELDS}/badge/${encodeStaticPart(label)}-${encodeStaticPart(expression)}-${RUNTIME_COLOR}.svg?style=flat`,
+        manifest
+          .split("/")
+          .map((part) => encodePathPart(part))
+          .join("/"),
+      ),
+    ];
+  });
+}
+
 function workflowName(workflow: string): string {
   const parts = workflow.split(/[\\/]/u);
   return parts.at(-1) ?? workflow;
@@ -123,22 +164,29 @@ function runtimeBadges(packages: readonly ProjectPackage[]): string[] {
   });
 }
 
+function publishedBadges(packages: readonly ProjectPackage[]): string[] {
+  const badges: string[] = [];
+  for (const item of packages) {
+    const badge = packageBadge(item);
+    if (badge !== undefined) badges.push(badge);
+    badges.push(downloadBadge(item));
+    if (item.registry === "crates" && item.docs === true) badges.push(docsBadge(item));
+  }
+  return badges;
+}
+
 /** Return a deterministic Markdown badge row for the discovered project. */
 export function projectBadges(root: string | URL, options?: ProjectBadgesOptions): MarkdownFrame {
   const project = discoverProject(root, options?.packages);
   const badges: string[] = [];
 
-  if (options?.published !== false) {
-    for (const item of project.packages) {
-      const badge = packageBadge(item);
-      if (badge !== undefined) badges.push(badge);
-    }
-  }
+  if (options?.published !== false) badges.push(...publishedBadges(project.packages));
 
   const workflow = options?.workflow ?? project.workflow;
   const ci = workflowBadge(project.repository, workflow);
   if (ci !== undefined) badges.push(ci);
   badges.push(...runtimeBadges(project.packages));
+  badges.push(...licenseBadges(project.packages));
 
   return { opening: badges.join(" "), closing: "" };
 }

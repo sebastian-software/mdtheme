@@ -3,10 +3,10 @@
 Use Node.js 24 or newer and the pinned pnpm version in `package.json`.
 CI runs the complete checks on Node.js 24 and 26; releases use Node.js 24.
 
-`tsc` uses TypeScript 7. The `typescript` dependency is a compatibility alias
-for tooling that still imports the TypeScript 6 API. See the
-[compiler decision](adr/0006-use-typescript-7-with-tooling-compatibility.md)
-before removing either dependency.
+`tsc` and the lint tooling use the same TypeScript 6 dependency. This small
+package does not need a separate native compiler or compatibility aliases.
+See the [compiler decision](adr/0006-use-typescript-7-with-tooling-compatibility.md)
+before upgrading to a new compiler major.
 
 ```sh
 pnpm install --frozen-lockfile

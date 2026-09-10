@@ -2,6 +2,7 @@ import { globSync } from "node:fs";
 import { basename, dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isRecord, parseJson, parseTomlManifest, parseYamlFile, regularFile, } from "./project-files.js";
+import { hasRustDocs, licenseMetadata } from "./project-package-details.js";
 import { discoverRepository, discoverWorkflow } from "./project-repository.js";
 const NPM_MANIFEST = "package.json";
 const CARGO_MANIFEST = "Cargo.toml";
@@ -37,14 +38,17 @@ function hasPlatformConstraint(manifest) {
 function npmIsPublishable(manifest) {
     return manifest.private !== true && !hasPlatformConstraint(manifest);
 }
-function npmMetadata(manifest, path, explicit) {
-    const name = packageName(manifest, path, explicit);
+function npmMetadata(manifest, path, options) {
+    const name = packageName(manifest, path, options.explicit);
     if (name === undefined || !npmIsPublishable(manifest))
         return undefined;
     const engines = isRecord(manifest.engines) ? asString(manifest.engines.node) : undefined;
-    return engines === undefined
-        ? { registry: "npm", name }
-        : { registry: "npm", name, runtime: engines };
+    return {
+        registry: "npm",
+        name,
+        ...(engines === undefined ? {} : { runtime: engines }),
+        ...licenseMetadata(manifest.license, options.root, path),
+    };
 }
 function optionalDependencyNames(manifest) {
     const dependencies = manifest.optionalDependencies;
@@ -83,9 +87,13 @@ function cargoMetadata(manifest, path, options) {
     if (name === undefined)
         return undefined;
     const runtime = cargoField(packageTable, options.workspacePackage, "rust-version");
-    return runtime === undefined
-        ? { registry: "crates", name }
-        : { registry: "crates", name, runtime };
+    return {
+        registry: "crates",
+        name,
+        ...(runtime === undefined ? {} : { runtime }),
+        ...licenseMetadata(cargoField(packageTable, options.workspacePackage, "license"), options.root, path),
+        ...(hasRustDocs(manifest, path) ? { docs: true } : {}),
+    };
 }
 function projectRoot(root) {
     if (root instanceof URL)
@@ -144,8 +152,8 @@ function explicitPackages(root, paths) {
     const result = [];
     for (const path of manifests) {
         const metadata = basename(path) === NPM_MANIFEST
-            ? npmMetadata(parseJson(path), path, true)
-            : cargoMetadata(parseTomlManifest(path), path, { explicit: true, workspacePackage });
+            ? npmMetadata(parseJson(path), path, { root, explicit: true })
+            : cargoMetadata(parseTomlManifest(path), path, { root, explicit: true, workspacePackage });
         if (metadata !== undefined)
             result.push(metadata);
     }
@@ -153,7 +161,10 @@ function explicitPackages(root, paths) {
 }
 function defaultNpmPackages(root, rootManifest) {
     if (rootManifest !== undefined) {
-        const rootMetadata = npmMetadata(rootManifest, resolve(root, NPM_MANIFEST), false);
+        const rootMetadata = npmMetadata(rootManifest, resolve(root, NPM_MANIFEST), {
+            root,
+            explicit: false,
+        });
         if (rootMetadata !== undefined)
             return [rootMetadata];
     }
@@ -170,7 +181,7 @@ function defaultNpmPackages(root, rootManifest) {
     const allManifests = [rootManifest, ...parsed.map((item) => item.manifest)].filter((item) => item !== undefined);
     const optionalTargets = new Set(allManifests.flatMap((manifest) => [...optionalDependencyNames(manifest)]));
     return dedupePackages(parsed.flatMap(({ path, manifest }) => {
-        const metadata = npmMetadata(manifest, path, false);
+        const metadata = npmMetadata(manifest, path, { root, explicit: false });
         return metadata !== undefined && !optionalTargets.has(metadata.name) ? [metadata] : [];
     }));
 }
@@ -189,14 +200,18 @@ function defaultCargoPackages(root) {
     const workspacePackage = isRecord(manifest.workspace) && isRecord(manifest.workspace.package)
         ? manifest.workspace.package
         : undefined;
-    const rootMetadata = cargoMetadata(manifest, rootPath, { explicit: false, workspacePackage });
+    const rootMetadata = cargoMetadata(manifest, rootPath, {
+        root,
+        explicit: false,
+        workspacePackage,
+    });
     if (rootMetadata !== undefined)
         return [rootMetadata];
     if (!isRecord(manifest.workspace))
         return [];
     return dedupePackages(cargoWorkspaceMembers(root, manifest.workspace).flatMap((path) => {
         const child = parseTomlManifest(path);
-        const metadata = cargoMetadata(child, path, { explicit: false, workspacePackage });
+        const metadata = cargoMetadata(child, path, { root, explicit: false, workspacePackage });
         return metadata === undefined ? [] : [metadata];
     }));
 }

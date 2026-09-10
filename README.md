@@ -6,13 +6,14 @@
   </a>
 </p>
 
-[![npm mdtheme](https://img.shields.io/npm/v/mdtheme.svg?style=flat&label=npm%3A%20mdtheme)](https://www.npmjs.com/package/mdtheme) [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/sebastian-software/mdtheme/ci.yml?style=flat)](https://github.com/sebastian-software/mdtheme/actions/workflows/ci.yml) [![Node.js >=24](https://img.shields.io/badge/Node.js-%3E%3D24-005164.svg?style=flat)](https://nodejs.org/)
+[![npm mdtheme](https://img.shields.io/npm/v/mdtheme.svg?style=flat&label=npm%3A%20mdtheme)](https://www.npmjs.com/package/mdtheme) [![npm monthly downloads: mdtheme](https://img.shields.io/npm/dm/mdtheme.svg?style=flat&label=npm%20monthly%20downloads%3A%20mdtheme)](https://www.npmjs.com/package/mdtheme) [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/sebastian-software/mdtheme/ci.yml?style=flat)](https://github.com/sebastian-software/mdtheme/actions/workflows/ci.yml) [![Node.js >=24](https://img.shields.io/badge/Node.js-%3E%3D24-005164.svg?style=flat)](https://nodejs.org/) [![License: MIT](https://img.shields.io/badge/License-MIT-005164.svg?style=flat)](package.json)
 
 # mdtheme
 
 Keep README branding consistent across repositories without copying headers,
 footers, and badges by hand. `mdtheme` wraps your Markdown source in reusable
-themes, formats the result, and checks that the committed README is up to date.
+themes and checks that the committed README is up to date. Your Markdown
+formatting stays as authored.
 
 You edit `README.md.src`. Readers see `README.md`. CI catches changes that have
 not been regenerated.
@@ -34,7 +35,7 @@ npx mdtheme --check
 ```
 
 No config is needed for this first step. The CLI reads `README.md.src` from the
-current directory and writes a formatted `README.md` with a generated-file
+current directory and writes `README.md` with a generated-file
 notice. Your source file stays unchanged.
 
 Add these scripts to your `package.json`:
@@ -75,7 +76,8 @@ repositories, export frames from a shared package or create ordinary TypeScript
 functions that return them. Themes wrap the source; they do not transform its
 content. The first theme in the array is the outermost frame.
 
-For badges derived from local package metadata, add
+For versions, downloads, licenses, CI, runtime requirements, and Rust library
+documentation badges derived from local project metadata, add
 `projectBadges(import.meta.url)` to `themes`. See the [badge guide](docs/badges.md)
 for imports, workspace discovery, and unpublished packages.
 
@@ -97,7 +99,7 @@ directory. Use `--config PATH` to select a config elsewhere. Source and output
 must be in the config directory, and the output must be named `README.md`.
 
 For a build script that already has Markdown text, call the async
-`renderMarkdown(source, themes)` API. It returns formatted Markdown without
+`renderMarkdown(source, themes)` API. It returns the composed Markdown without
 reading or writing files. See [usage and CI](docs/usage.md) for the full example
 and exit statuses.
 

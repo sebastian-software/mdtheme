@@ -207,3 +207,76 @@ test("filters Cargo publication restrictions including workspace inheritance", a
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("inherits Cargo licenses and discovers documented library targets", async () => {
+  const root = await fixture();
+  try {
+    await put(
+      root,
+      "Cargo.toml",
+      '[workspace]\nmembers = ["crates/*"]\n[workspace.package]\nlicense = "MIT OR Apache-2.0"\n',
+    );
+    await put(
+      root,
+      "crates/lib/Cargo.toml",
+      '[package]\nname = "library"\nlicense.workspace = true\n[lib]\npath = "library.rs"\n',
+    );
+    await put(root, "crates/lib/library.rs", "pub fn example() {}\n");
+    await put(root, "crates/bin/Cargo.toml", '[package]\nname = "binary"\n');
+    await put(root, "crates/bin/src/main.rs", "fn main() {}\n");
+    await put(
+      root,
+      "crates/hidden/Cargo.toml",
+      '[package]\nname = "hidden-docs"\n[lib]\ndoc = false\n',
+    );
+    await put(root, "crates/hidden/src/lib.rs", "pub fn example() {}\n");
+    await put(
+      root,
+      "crates/disabled/Cargo.toml",
+      '[package]\nname = "disabled-lib"\nautolib = false\n',
+    );
+    await put(root, "crates/disabled/src/lib.rs", "pub fn example() {}\n");
+    const packages = discoverProject(root).packages;
+    assert.deepEqual(
+      packages.find((item) => item.name === "library"),
+      {
+        name: "library",
+        registry: "crates",
+        docs: true,
+        license: { expression: "MIT OR Apache-2.0", manifest: "crates/lib/Cargo.toml" },
+      },
+    );
+    for (const name of ["binary", "hidden-docs", "disabled-lib"]) {
+      assert.equal(packages.find((item) => item.name === name)?.docs, undefined);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("keeps workspace licenses distinct and does not invent missing licenses", async () => {
+  const root = await fixture();
+  try {
+    await put(
+      root,
+      "package.json",
+      JSON.stringify({ private: true, license: "MIT", workspaces: ["packages/*"] }),
+    );
+    for (const [name, license] of [
+      ["first", "Apache-2.0"],
+      ["second", undefined],
+      ["blank", "  "],
+    ]) {
+      await put(root, `packages/${name}/package.json`, JSON.stringify({ name, license }));
+    }
+    const packages = discoverProject(root).packages;
+    assert.deepEqual(packages.find((item) => item.name === "first")?.license, {
+      expression: "Apache-2.0",
+      manifest: "packages/first/package.json",
+    });
+    assert.equal(packages.find((item) => item.name === "second")?.license, undefined);
+    assert.equal(packages.find((item) => item.name === "blank")?.license, undefined);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

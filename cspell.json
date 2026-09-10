@@ -10,6 +10,8 @@
     "repometa",
     "themer",
     "jiti",
-    "mdtheme"
+    "mdtheme",
+    "autolib",
+    "docsrs"
   ]
 }
