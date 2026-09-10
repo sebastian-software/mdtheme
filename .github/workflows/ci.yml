@@ -71,6 +71,9 @@ jobs:
 
       - run: pnpm run --if-present build
 
+      # Immutable Git consumers use the committed build.
+      - run: pnpm check:dist
+
       - run: pnpm run --if-present test
 
       # This package must work after installation, not just from workspace sources.

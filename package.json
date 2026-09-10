@@ -52,8 +52,9 @@
     "test": "node --test test/*.test.mjs",
     "verify:package": "node scripts/verify-package.mjs",
     "standards:check": "standards check",
-    "agent:check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build && pnpm test && pnpm verify:package && pnpm standards:check",
-    "prepack": "pnpm build"
+    "agent:check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build && pnpm check:dist && pnpm test && pnpm verify:package && pnpm standards:check",
+    "prepack": "pnpm build",
+    "check:dist": "git diff --exit-code -- dist"
   },
   "dependencies": {
     "jiti": "2.7.0",
