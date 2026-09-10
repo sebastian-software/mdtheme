@@ -1,6 +1,6 @@
 {
   "name": "mdtheme",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compose Markdown documents with reusable brand frames and check generated READMEs for drift.",
   "keywords": [
     "cli",
