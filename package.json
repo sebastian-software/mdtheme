@@ -1,0 +1,75 @@
+{
+  "name": "markdown-themer",
+  "version": "0.1.0",
+  "description": "Compose Markdown documents with reusable brand frames and check generated READMEs for drift.",
+  "keywords": [
+    "cli",
+    "documentation",
+    "markdown",
+    "readme",
+    "theming"
+  ],
+  "homepage": "https://github.com/sebastian-software/markdown-themer#readme",
+  "bugs": {
+    "url": "https://github.com/sebastian-software/markdown-themer/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Sebastian Software GmbH",
+    "url": "https://sebastian-software.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastian-software/markdown-themer.git"
+  },
+  "bin": {
+    "markdown-themer": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "oxlint -c oxlint.config.ts && eslint . --max-warnings=0",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "node --test test/*.test.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "standards:check": "standards check",
+    "agent:check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm build && pnpm test && pnpm verify:package && pnpm standards:check",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "jiti": "2.7.0",
+    "prettier": "3.9.6"
+  },
+  "devDependencies": {
+    "@sebastian-software/standards": "0.10.0",
+    "@types/node": "24.12.4",
+    "eslint": "10.4.0",
+    "eslint-config-setup": "0.4.0",
+    "oxfmt": "0.67.0",
+    "oxlint": "1.82.0",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.25.0"
+}
