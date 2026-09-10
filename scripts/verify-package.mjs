@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -22,7 +22,15 @@ async function run(command, args, options) {
     });
     return { ...result, code: 0 };
   } catch (error) {
-    const code = typeof error.code === "number" ? error.code : 1;
+    if (typeof error.code !== "number") {
+      throw new TypeError(
+        `${command} ${args.join(" ")} failed: ${error.message ?? String(error)}`,
+        {
+          cause: error,
+        },
+      );
+    }
+    const code = error.code;
     const stdout = error.stdout ?? "";
     const stderr = error.stderr ?? "";
     if (!expectedCodes.includes(code)) {
@@ -38,6 +46,22 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function packFilename(stdout) {
+  const starts = [];
+  for (let index = stdout.indexOf("["); index !== -1; index = stdout.indexOf("[", index + 1)) {
+    starts.push(index);
+  }
+  for (const start of starts.toReversed()) {
+    try {
+      const value = JSON.parse(stdout.slice(start));
+      if (Array.isArray(value) && typeof value[0]?.filename === "string") return value[0].filename;
+    } catch {
+      // npm lifecycle output can precede its final JSON result.
+    }
+  }
+  throw new Error(`npm pack did not return a tarball filename:\n${stdout}`);
+}
+
 const scratchRoot = await mkdtemp(join(tmpdir(), "markdown-themer-verify-"));
 const packRoot = await mkdtemp(join(tmpdir(), "markdown-themer-pack-"));
 const npmCache = suppliedNpmCache ?? (offline ? undefined : join(scratchRoot, ".npm-cache"));
@@ -46,14 +70,24 @@ try {
   const packed = await run("npm", ["pack", "--json", "--pack-destination", packRoot], {
     cwd: packageRoot,
   });
-  const packResult = JSON.parse(packed.stdout);
-  assert(
-    Array.isArray(packResult) && packResult[0]?.filename,
-    "npm pack did not return a tarball filename",
-  );
-  const tarball = join(packRoot, packResult[0].filename);
+  const tarball = join(packRoot, packFilename(packed.stdout));
 
   await run("npm", ["init", "--yes"], { cwd: scratchRoot });
+  await writeFile(
+    join(scratchRoot, "package.json"),
+    JSON.stringify(
+      {
+        engines: { node: ">=24" },
+        name: "markdown-themer-badge-consumer",
+        packageManager: "pnpm@11.25.0",
+        repository: "https://github.com/example/markdown-themer-badge-consumer",
+        type: "module",
+        version: "1.2.3",
+      },
+      null,
+      2,
+    ),
+  );
   const installArgs = ["install", "--ignore-scripts"];
   if (offline) installArgs.push("--offline");
   installArgs.push(tarball);
@@ -73,7 +107,7 @@ try {
   );
   await writeFile(
     join(scratchRoot, "consumer-types.ts"),
-    `import { defineConfig, renderMarkdown } from "markdown-themer";\nimport type { Config, MarkdownFrame } from "markdown-themer";\n\nconst frame: MarkdownFrame = { opening: "<section>\\n", closing: "\\n</section>\\n" };\nconst config: Config = defineConfig({ themes: [frame] });\nvoid config;\nvoid renderMarkdown("# Types\\n", [frame]);\n`,
+    `import { defineConfig, projectBadges, renderMarkdown } from "markdown-themer";\nimport type { Config, MarkdownFrame } from "markdown-themer";\n\nconst frame: MarkdownFrame = { opening: "<section>\\n", closing: "\\n</section>\\n" };\nconst badges = projectBadges(import.meta.url, { published: false, packages: ["package.json"], workflow: "ci.yml" });\nconst config: Config = defineConfig({ themes: [frame, badges] });\nvoid config;\nvoid renderMarkdown("# Types\\n", [frame, badges]);\n`,
   );
   await writeFile(
     join(scratchRoot, "tsconfig.json"),
@@ -99,9 +133,42 @@ try {
   const apiCheck = join(scratchRoot, "api-check.mjs");
   await writeFile(
     apiCheck,
-    `import { defineConfig, renderMarkdown } from "markdown-themer";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\n`,
+    `import { defineConfig, projectBadges, renderMarkdown } from "markdown-themer";\n\nconst config = defineConfig({ themes: [{ opening: "<section>\\n", closing: "\\n</section>\\n" }, projectBadges(import.meta.url, { published: false })] });\nconst output = await renderMarkdown("# API\\n", config.themes);\nif (typeof output !== "string" || !output.includes("# API")) process.exit(1);\n`,
   );
   await run(process.execPath, [apiCheck], { cwd: scratchRoot });
+
+  const badgeRoot = join(scratchRoot, "badge-project");
+  const outsideCwd = join(scratchRoot, "outside");
+  await mkdir(join(badgeRoot, ".github/workflows"), { recursive: true });
+  await mkdir(outsideCwd);
+  await writeFile(
+    join(badgeRoot, "package.json"),
+    JSON.stringify(
+      {
+        engines: { node: ">=24" },
+        name: "badge-fixture",
+        packageManager: "pnpm@11.25.0",
+        repository: "https://github.com/example/badge-fixture",
+        version: "2.3.4",
+      },
+      null,
+      2,
+    ),
+  );
+  await writeFile(join(badgeRoot, ".github/workflows/ci.yml"), "name: CI\n");
+  await writeFile(
+    join(badgeRoot, "README.md.src"),
+    "# Badge fixture\n\nThis source remains ordinary Markdown.\n",
+  );
+  await writeFile(
+    join(badgeRoot, "theme-factory.ts"),
+    `import type { MarkdownFrame } from "markdown-themer";\n\nexport function headerFrame(): MarkdownFrame {\n  return { opening: "<!-- header -->\\n", closing: "\\n<!-- header end -->\\n" };\n}\n`,
+  );
+  const badgeConfig = join(badgeRoot, "markdown-themer.config.ts");
+  await writeFile(
+    badgeConfig,
+    `import { defineConfig, projectBadges } from "markdown-themer";\nimport { headerFrame } from "./theme-factory.ts";\n\nexport default defineConfig({\n  source: "README.md.src",\n  output: "README.md",\n  themes: [headerFrame(), projectBadges(import.meta.url, { published: false, workflow: "ci.yml" })],\n});\n`,
+  );
 
   const cli = join(scratchRoot, "node_modules/.bin/markdown-themer");
   const source = join(scratchRoot, "README.md.src");
@@ -125,6 +192,65 @@ try {
     "node_modules/markdown-themer/examples/neutral/markdown-themer.config.ts",
   );
   await run(cli, ["--check", "--config", packagedExampleConfig], { cwd: scratchRoot });
+
+  const badgeOutput = join(badgeRoot, "README.md");
+  const badgeSource = join(badgeRoot, "README.md.src");
+  const badgeSourceBefore = await readFile(badgeSource);
+  await run(cli, ["--write", "--config", badgeConfig], { cwd: outsideCwd });
+  const badgeGenerated = await readFile(badgeOutput, "utf8");
+  assert(badgeGenerated.includes("shields.io"), "projectBadges did not render dynamic badge URLs");
+  assert(
+    badgeGenerated.includes("github/actions/workflow/status/example/badge-fixture/ci.yml"),
+    "projectBadges did not render the CI badge",
+  );
+  assert(badgeGenerated.includes("Node.js"), "projectBadges did not retain runtime badges");
+  assert(
+    badgeGenerated.includes("# Badge fixture"),
+    "projectBadges output does not contain source Markdown",
+  );
+  assert(
+    !badgeGenerated.includes("npmjs.com"),
+    "published:false did not suppress npm registry badges",
+  );
+  assert(
+    !badgeGenerated.includes("crates.io"),
+    "published:false did not suppress crates.io registry badges",
+  );
+  assert(
+    badgeGenerated.indexOf("<!-- header -->") < badgeGenerated.indexOf("shields.io"),
+    "projectBadges did not follow the header frame",
+  );
+  await run(cli, ["--check", "--config", badgeConfig], { cwd: outsideCwd });
+
+  const badgeBeforeCheck = await readFile(badgeOutput);
+  const badgeDrifted = Buffer.concat([
+    badgeBeforeCheck,
+    Buffer.from("\nDrift introduced by verifier.\n"),
+  ]);
+  await writeFile(badgeOutput, badgeDrifted);
+  const badgeDriftStat = await stat(badgeOutput);
+  const badgeCheck = await run(cli, ["--check", "--config", badgeConfig], {
+    cwd: outsideCwd,
+    expectedCodes: [1],
+  });
+  assert(badgeCheck.code === 1, "projectBadges check did not report drift with exit status 1");
+  const badgeAfterCheck = await readFile(badgeOutput);
+  const badgeAfterCheckStat = await stat(badgeOutput);
+  assert(
+    Buffer.compare(badgeAfterCheck, badgeDrifted) === 0,
+    "projectBadges check unexpectedly rewrote output",
+  );
+  assert(
+    badgeAfterCheckStat.mtimeMs === badgeDriftStat.mtimeMs,
+    "projectBadges check changed output metadata",
+  );
+  await run(cli, ["--write", "--config", badgeConfig], { cwd: outsideCwd });
+  await run(cli, ["--check", "--config", badgeConfig], { cwd: outsideCwd });
+  const badgeSourceAfter = await readFile(badgeSource);
+  assert(
+    Buffer.compare(badgeSourceAfter, badgeSourceBefore) === 0,
+    "projectBadges write mutated the source file",
+  );
 
   const beforeCheck = await readFile(output);
   const drifted = Buffer.concat([beforeCheck, Buffer.from("\nDrift introduced by verifier.\n")]);

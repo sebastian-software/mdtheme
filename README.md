@@ -6,6 +6,8 @@
   </a>
 </p>
 
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/sebastian-software/markdown-themer/ci.yml?style=flat)](https://github.com/sebastian-software/markdown-themer/actions/workflows/ci.yml) [![Node.js >=24](https://img.shields.io/badge/Node.js-%3E%3D24-005164.svg?style=flat)](https://nodejs.org/)
+
 # markdown-themer
 
 `markdown-themer` turns a Markdown source document into a checked, consistently
@@ -17,6 +19,11 @@ The tool works on Markdown text. A theme is a small pair of strings: one string
 opens a frame around the document and one string closes it. Themes add those
 boundaries around ordinary Markdown source; the complete result is then
 formatted with the package's pinned Markdown formatter.
+
+For repository metadata, `projectBadges(import.meta.url)` adds deterministic
+runtime, CI, and project registry badges from local package manifests. Use
+`published: false` for a project that is not on npm or crates.io yet. See
+[`docs/badges.md`](docs/badges.md) for discovery rules and workspace examples.
 
 ## Install
 
@@ -155,7 +162,8 @@ The [repository config](markdown-themer.config.ts) selects the company frame;
 ---
 
 <p align="center">
-  <strong>Built by Sebastian Software</strong> — consulting for TypeScript, React &amp; Rust.<br />
+  <a href="https://oss.sebastian-software.com"><img src="https://img.shields.io/badge/Powered_by-Sebastian_Software-005164?style=flat" alt="Powered by Sebastian Software" /></a><br />
+  Consulting for TypeScript, React &amp; Rust.<br />
   <a href="https://sebastian-software.de">Work with us</a> · <a href="https://oss.sebastian-software.com">More open source</a>
 </p>
 

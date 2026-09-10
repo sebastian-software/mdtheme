@@ -10,6 +10,11 @@ opens a frame around the document and one string closes it. Themes add those
 boundaries around ordinary Markdown source; the complete result is then
 formatted with the package's pinned Markdown formatter.
 
+For repository metadata, `projectBadges(import.meta.url)` adds deterministic
+runtime, CI, and project registry badges from local package manifests. Use
+`published: false` for a project that is not on npm or crates.io yet. See
+[`docs/badges.md`](docs/badges.md) for discovery rules and workspace examples.
+
 ## Install
 
 The package requires Node.js 24 or newer. It is currently consumed from its

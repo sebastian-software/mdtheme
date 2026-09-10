@@ -62,7 +62,9 @@
   },
   "dependencies": {
     "jiti": "2.7.0",
-    "prettier": "3.9.6"
+    "prettier": "3.9.6",
+    "smol-toml": "1.8.0",
+    "yaml": "2.9.0"
   },
   "devDependencies": {
     "@sebastian-software/standards": "0.10.0",
@@ -71,7 +73,7 @@
     "eslint-config-setup": "0.4.0",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
-    "sebastian-theme": "github:sebastian-software/sebastian-theme#bb09dc49d01c39694b5ec0c418a1304d2cf6bff3",
+    "sebastian-theme": "github:sebastian-software/sebastian-theme#691dc8d393514044faa6eb122ba5995cb5c99ea7",
     "typescript": "6.0.3"
   },
   "engines": {

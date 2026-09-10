@@ -17,6 +17,12 @@ importers:
       prettier:
         specifier: 3.9.6
         version: 3.9.6
+      smol-toml:
+        specifier: 1.8.0
+        version: 1.8.0
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
     devDependencies:
       '@sebastian-software/standards':
         specifier: 0.10.0
@@ -37,8 +43,8 @@ importers:
         specifier: 1.82.0
         version: 1.82.0
       sebastian-theme:
-        specifier: github:sebastian-software/sebastian-theme#bb09dc49d01c39694b5ec0c418a1304d2cf6bff3
-        version: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/bb09dc49d01c39694b5ec0c418a1304d2cf6bff3
+        specifier: github:sebastian-software/sebastian-theme#691dc8d393514044faa6eb122ba5995cb5c99ea7
+        version: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/691dc8d393514044faa6eb122ba5995cb5c99ea7
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -2565,8 +2571,8 @@ packages:
     resolution: {integrity: sha512-3A6sD0WYP7+QrjbfNA2FN3FsOaGGFoekCVgTyypy53gPxhbkCIjtO6YWgdrfM+n/8sI8JeXZOIxsHjMTNxQ4nQ==}
     engines: {node: ^14.0.0 || >=16.0.0}
 
-  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/bb09dc49d01c39694b5ec0c418a1304d2cf6bff3:
-    resolution: {gitHosted: true, integrity: sha512-vaE3t6x22tplq1Z8fBJ/jsZ/iVttAIBHoQLDDdcGB3JkZnUI7Pv9BUjjEFyuLp7Ph3OeqhgVM9hBY7duvCnPRg==, tarball: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/bb09dc49d01c39694b5ec0c418a1304d2cf6bff3}
+  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/691dc8d393514044faa6eb122ba5995cb5c99ea7:
+    resolution: {gitHosted: true, integrity: sha512-D5pjrA8Z9bEBOJxdiGDqfEYpQ8yG6ceOX8aIsOTROwu5B2OGXDP1ncyJoLF2sFbbyufcdKUkh4o95VQYmwnYBw==, tarball: https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/691dc8d393514044faa6eb122ba5995cb5c99ea7}
     version: 0.1.0
     engines: {node: '>=24'}
 
@@ -5894,7 +5900,7 @@ snapshots:
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
 
-  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/bb09dc49d01c39694b5ec0c418a1304d2cf6bff3: {}
+  sebastian-theme@https://codeload.github.com/sebastian-software/sebastian-theme/tar.gz/691dc8d393514044faa6eb122ba5995cb5c99ea7: {}
 
   semver@6.3.1: {}
 
