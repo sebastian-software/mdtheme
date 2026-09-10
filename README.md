@@ -10,79 +10,80 @@
 
 # mdtheme
 
-`mdtheme` turns a Markdown source document into a checked, consistently
-formatted output file. It is useful when a repository keeps an authored
-`README.md.src` and wants `README.md` to be reproducible in local development
-and CI.
+Keep README branding consistent across repositories without copying headers,
+footers, and badges by hand. `mdtheme` wraps your Markdown source in reusable
+themes, formats the result, and checks that the committed README is up to date.
 
-The tool works on Markdown text. A theme is a small pair of strings: one string
-opens a frame around the document and one string closes it. Themes add those
-boundaries around ordinary Markdown source; the complete result is then
-formatted with the package's pinned Markdown formatter.
+You edit `README.md.src`. Readers see `README.md`. CI catches changes that have
+not been regenerated.
 
-For repository metadata, `projectBadges(import.meta.url)` adds deterministic
-runtime, CI, and project registry badges from local package manifests. Use
-`published: false` for a project that is not on npm or crates.io yet. See
-[`docs/badges.md`](docs/badges.md) for discovery rules and workspace examples.
+## Get started
 
-## Install
-
-The package requires Node.js 24 or newer.
+Use Node.js 24 or newer. Install `mdtheme` in your project:
 
 ```sh
 npm install --save-dev mdtheme
 ```
 
-For a local checkout, build and pack it first, then install the generated tarball:
+Create `README.md.src` with your project content. If you already have a README,
+copy its content into the source file first. Then generate and check the output:
 
 ```sh
-pnpm install
-npm pack
-npm install --save-dev /path/to/checkout/mdtheme-0.1.0.tgz
+npx mdtheme --write
+npx mdtheme --check
 ```
 
-## Quick start
+No config is needed for this first step. The CLI reads `README.md.src` from the
+current directory and writes a formatted `README.md` with a generated-file
+notice. Your source file stays unchanged.
 
-Create `README.md.src` with the Markdown you want to edit. Add a local config:
+Add these scripts to your `package.json`:
 
-```ts
-// mdtheme.config.ts
-import { defineConfig } from "mdtheme";
-import { detailsFrame } from "./theme-factory.ts";
-
-export default defineConfig({
-  source: "README.md.src",
-  output: "README.md",
-  themes: [detailsFrame("Project notes")],
-});
-```
-
-Factories are ordinary local TypeScript functions. For example:
-
-```ts
-// theme-factory.ts
-import type { MarkdownFrame } from "mdtheme";
-
-export function detailsFrame(summary: string): MarkdownFrame {
-  return {
-    opening: `<details>\n<summary>${summary}</summary>\n\n`,
-    closing: "\n</details>\n",
-  };
+```json
+{
+  "scripts": {
+    "readme:write": "mdtheme --write",
+    "readme:check": "mdtheme --check"
+  }
 }
 ```
 
-Generate the output and then check it in CI:
+Commit both files. Run `npm run readme:write` after editing the source and
+`npm run readme:check` in CI. Check mode never writes: it exits with status 1
+when the output is missing or out of date, and 2 for invalid arguments or input.
 
-```sh
-pnpm exec mdtheme --write
-pnpm exec mdtheme --check
+## Add a theme
+
+A theme contributes opening and closing Markdown around your content. Add
+`mdtheme.config.ts` next to the source:
+
+```ts
+import { defineConfig } from "mdtheme";
+
+export default defineConfig({
+  themes: [
+    {
+      opening: "> Part of the Example project.\n",
+      closing: "Questions? [Open an issue](https://github.com/example/project/issues).\n",
+    },
+  ],
+});
 ```
 
-Edit `README.md.src`; do not edit generated `README.md` by hand. The write
-operation computes the complete result before replacing the output. The check
-operation is read-only and exits with status 1 when the output is out of date.
+Run `npm run readme:write` again to include the frame. To reuse branding across
+repositories, export frames from a shared package or create ordinary TypeScript
+functions that return them. Themes wrap the source; they do not transform its
+content. The first theme in the array is the outermost frame.
 
-## CLI
+For badges derived from local package metadata, add
+`projectBadges(import.meta.url)` to `themes`. See the [badge guide](docs/badges.md)
+for imports, workspace discovery, and unpublished packages.
+
+Configs are trusted local code and can import theme factories. Review them like
+other build scripts. See [theme authoring](docs/theme-authoring.md) for reusable
+factories, nesting, and Markdown boundaries.
+
+## CLI and library
 
 ```text
 mdtheme --write [--config PATH]
@@ -91,35 +92,14 @@ mdtheme --help
 mdtheme --version
 ```
 
-With no `--config`, the CLI looks in the current directory for one of
-`mdtheme.config.ts`, `.mts`, `.js`, or `.mjs`. Pass an explicit path
-when the config lives elsewhere. Source and output paths in a config resolve
-from the config file's directory.
+The CLI discovers `mdtheme.config.ts`, `.mts`, `.js`, or `.mjs` in the current
+directory. Use `--config PATH` to select a config elsewhere. Source and output
+must be in the config directory, and the output must be named `README.md`.
 
-`--write` returns 0 after writing a valid output. `--check` returns 0 when the
-output matches, 1 when it differs, and 2 for invalid arguments or input. A
-configuration file is trusted local code: a TypeScript config is loaded and
-executed so it can import ordinary theme factories. Keep configs in the
-repository and review them like any other build script.
-
-## Theme boundaries
-
-The public API is deliberately small:
-
-```ts
-import { defineConfig, renderMarkdown } from "mdtheme";
-import type { MarkdownFrame } from "mdtheme";
-```
-
-`renderMarkdown(source, themes)` receives Markdown text and returns the framed
-Markdown. Themes are applied in array order; their closing strings are emitted
-in reverse order. Empty opening or closing strings are valid. See
-[`docs/theme-authoring.md`](docs/theme-authoring.md) for boundary guidance and
-[`examples/neutral`](examples/neutral) for complete local factories.
-
-The package has no React or web rendering dependency. A React application can
-use its own components elsewhere and keep Markdown framing in this package's
-plain string factories.
+For a build script that already has Markdown text, call the async
+`renderMarkdown(source, themes)` API. It returns formatted Markdown without
+reading or writing files. See [usage and CI](docs/usage.md) for the full example
+and exit statuses.
 
 ## This README
 
@@ -134,6 +114,7 @@ The [repository config](mdtheme.config.ts) selects the company frame;
 - [Usage and CI](docs/usage.md)
 - [Authoring theme factories](docs/theme-authoring.md)
 - [Maintaining the package](docs/maintaining.md)
+- [Architecture decisions](docs/adr/README.md)
 - [Neutral examples](examples/neutral)
 
 ---

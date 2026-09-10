@@ -1,5 +1,8 @@
 # Keep Markdown and web composition independent
 
+- Status: accepted
+- Updated: 2026-09-10
+
 The tool composes Markdown frames and checks generated Markdown. Website shells
 are independently authored React layouts in brand packages and consume no API
 from this tool. The overlap between the two output paths is too small to justify

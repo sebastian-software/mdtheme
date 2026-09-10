@@ -2,7 +2,8 @@
 
 `mdtheme` keeps an authored Markdown source separate from the output
 file that a repository publishes. The default pair is `README.md.src` and
-`README.md`; both names can be set in a config.
+`README.md`. A config can change the source filename; CLI output is always
+named `README.md`.
 
 ## Install
 
@@ -33,8 +34,9 @@ export default defineConfig({
 });
 ```
 
-`source` and `output` are paths relative to the config file. If no config is
-provided, the CLI discovers one of these names in the current directory:
+`source` and `output` are paths relative to the config file. Both files must
+be in that directory, and `output` must be named `README.md`. If no config is
+selected explicitly, the CLI discovers one of these names in the current directory:
 
 ```text
 mdtheme.config.ts
@@ -43,7 +45,8 @@ mdtheme.config.js
 mdtheme.config.mjs
 ```
 
-Multiple discovered configs are an error. `--config PATH` selects one config
+When no config is found, the CLI uses `README.md.src`, `README.md`, and no
+themes. Multiple discovered configs are an error. `--config PATH` selects one config
 explicitly. The config loader supports TypeScript on Node.js 24 and newer.
 The source basename is included in the generated notice and must use only a
 letter or number first, followed by letters, numbers, `.`, `_`, or `-`.

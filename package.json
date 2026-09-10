@@ -68,16 +68,17 @@
   },
   "devDependencies": {
     "@sebastian-software/standards": "0.10.0",
-    "@types/node": "24.12.4",
-    "eslint": "10.4.0",
-    "eslint-config-setup": "0.4.0",
+    "@types/node": "24.13.4",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "eslint": "10.10.0",
+    "eslint-config-setup": "0.5.2",
     "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
-    "sebastian-theme": "github:sebastian-software/sebastian-theme#691dc8d393514044faa6eb122ba5995cb5c99ea7",
-    "typescript": "6.0.3"
+    "sebastian-theme": "github:sebastian-software/sebastian-theme#7c95729a4ef606eb7844afce8c2ce8f2718a7569",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@11.25.0"
+  "packageManager": "pnpm@12.3.4"
 }
