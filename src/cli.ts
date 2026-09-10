@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 import { loadConfig } from "./config.js";
 import { checkFiles, writeFiles } from "./files.js";
+import { runPrePush } from "./pre-push.js";
 
 export type CliIO = {
   readonly stdout?: (text: string) => void;
@@ -12,13 +13,14 @@ export type CliIO = {
 };
 
 export type ParsedCli = {
-  readonly operation: "check" | "help" | "version" | "write";
+  readonly operation: "check" | "help" | "pre-push" | "version" | "write";
   readonly configPath: string | undefined;
 };
 
 export const HELP = `Usage: mdtheme <operation> [options]
 
 Operations:
+  pre-push            Regenerate README.md and require a clean, committed worktree
   --write             Render the source and atomically update README.md
   --check             Render the source and check README.md for drift
   --help              Show this help
@@ -34,6 +36,7 @@ type ParseState = {
 };
 
 const OPERATIONS = new Map<string, ParsedCli["operation"]>([
+  ["pre-push", "pre-push"],
   ["--check", "check"],
   ["--help", "help"],
   ["--version", "version"],
@@ -104,6 +107,7 @@ function shellQuote(value: string): string {
 }
 
 async function execute(parsed: ParsedCli, io: Required<CliIO>): Promise<number> {
+  if (parsed.operation === "pre-push") return runPrePush(parsed.configPath, io);
   const config = await loadConfig(parsed.configPath);
   if (parsed.operation === "check") {
     const drift = await checkFiles(config);

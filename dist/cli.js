@@ -4,9 +4,11 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { loadConfig } from "./config.js";
 import { checkFiles, writeFiles } from "./files.js";
+import { runPrePush } from "./pre-push.js";
 export const HELP = `Usage: mdtheme <operation> [options]
 
 Operations:
+  pre-push            Regenerate README.md and require a clean, committed worktree
   --write             Render the source and atomically update README.md
   --check             Render the source and check README.md for drift
   --help              Show this help
@@ -16,6 +18,7 @@ Options:
   --config PATH       Load a TypeScript or JavaScript config from PATH
 `;
 const OPERATIONS = new Map([
+    ["pre-push", "pre-push"],
     ["--check", "check"],
     ["--help", "help"],
     ["--version", "version"],
@@ -82,6 +85,8 @@ function shellQuote(value) {
     return `'${value.replaceAll("'", "'\\''")}'`;
 }
 async function execute(parsed, io) {
+    if (parsed.operation === "pre-push")
+        return runPrePush(parsed.configPath, io);
     const config = await loadConfig(parsed.configPath);
     if (parsed.operation === "check") {
         const drift = await checkFiles(config);

@@ -19,3 +19,4 @@ configuration files; ADRs explain the constraints and tradeoffs behind them.
 - [Built output for Git consumers](0005-commit-built-output-for-git-consumers.md)
 - [TypeScript 6 development toolchain](0006-use-typescript-7-with-tooling-compatibility.md)
 - [Standard project badges](0007-use-a-fixed-project-badge-set.md)
+- [Local pre-push generation](0008-guard-pushes-with-local-readme-generation.md)

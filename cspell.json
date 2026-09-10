@@ -12,6 +12,7 @@
     "jiti",
     "mdtheme",
     "autolib",
-    "docsrs"
+    "docsrs",
+    "worktree"
   ]
 }

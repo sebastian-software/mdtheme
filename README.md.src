@@ -43,6 +43,10 @@ Commit both files. Run `npm run readme:write` after editing the source and
 `npm run readme:check` in CI. Check mode never writes: it exits with status 1
 when the output is missing or out of date, and 2 for invalid arguments or input.
 
+To regenerate automatically before pushing, add `mdtheme pre-push` to a Git hook.
+It blocks the push until the generated README and all worktree changes are
+committed. Follow the [pre-push setup guide](docs/pre-push.md).
+
 ## Add a theme
 
 A theme contributes opening and closing Markdown around your content. Add
@@ -80,6 +84,7 @@ factories, nesting, and Markdown boundaries.
 ```text
 mdtheme --write [--config PATH]
 mdtheme --check [--config PATH]
+mdtheme pre-push [--config PATH]
 mdtheme --help
 mdtheme --version
 ```
@@ -104,6 +109,7 @@ The [repository config](mdtheme.config.ts) selects the company frame;
 ## More documentation
 
 - [Usage and CI](docs/usage.md)
+- [Pre-push setup](docs/pre-push.md)
 - [Authoring theme factories](docs/theme-authoring.md)
 - [Maintaining the package](docs/maintaining.md)
 - [Architecture decisions](docs/adr/README.md)

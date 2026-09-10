@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 
+import { verifyPrePush } from "./verify-pre-push.mjs";
+
 const execFileAsync = promisify(execFile);
 const packageRoot = process.cwd();
 const offline = process.env.MDTHEME_VERIFY_OFFLINE === "1";
@@ -278,6 +280,7 @@ try {
   await run(cli, ["--check"], { cwd: scratchRoot });
   const sourceAfter = await readFile(source);
   assert(Buffer.compare(sourceAfter, sourceBefore) === 0, "CLI write mutated the source file");
+  await verifyPrePush(scratchRoot, join(packRoot, "remote.git"), run);
   console.log("mdtheme package consumer verification passed");
 } finally {
   await Promise.all([

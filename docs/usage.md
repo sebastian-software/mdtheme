@@ -14,7 +14,7 @@ npm install --save-dev mdtheme
 ```
 
 For a local checkout, run `pnpm install` and `npm pack`, then install the
-resulting `mdtheme-0.1.0.tgz` from the consumer project.
+resulting package tarball from the consumer project.
 
 ## A project config
 
@@ -101,6 +101,13 @@ Check mode never writes. Its exit statuses are:
 The generated output includes a static notice directing editors to the source.
 It contains no timestamp or network data, so the same source and config produce
 the same bytes.
+
+## Generate before pushing
+
+Use `mdtheme pre-push [--config PATH]` from a Git pre-push hook to regenerate
+from a clean checkout and block until the result is committed. The command
+returns 1 for a blocked push and 2 for an error. See [pre-push setup](pre-push.md)
+for installation, existing hooks, and the retry workflow. Keep `--check` in CI.
 
 ## Direct API use
 
