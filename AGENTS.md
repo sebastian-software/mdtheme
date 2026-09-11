@@ -1,22 +1,25 @@
 # mdtheme
 
-A Markdown-only CLI and library. Themes contribute opening and closing Markdown;
-React layouts and Ardo integration live elsewhere.
+A native Rust CLI and library for composing Markdown. Use US English.
+Read docs/adr/README.md for living decisions and update the relevant ADR when
+an agreed contract changes. Source is in src/, tests in tests/.
 
-Use Node 24+, pnpm, TypeScript ESM, and US English. Source is in `src/`, Node test
-runner tests are in `test/`, and the clean packed-consumer check is in `scripts/`.
-CI checks Node 24 and 26. Read `docs/adr/README.md` for the living decision
-records; update the relevant ADR when an agreed project contract changes.
+Run sh scripts/check.sh before pushing. It checks formatting, Clippy, tests,
+the generated README, and an installed Cargo package. Run cargo deny check
+when dependencies change. Cargo.toml declares the minimum Rust version.
 
-Run `pnpm agent:check` before pushing. It includes lint, formatting, typecheck,
-build, tests, a packed consumer, and standards consistency. Keep source files
-unchanged during generation. Edit README.md.src for the project corpus and run
-`pnpm readme:write`; the generated README uses sebastian-theme. `--check` must never write. Keep the package free
-of browser dependencies and speculative plugin APIs.
+Edit README.md.src and run cargo run -- --write. Configuration is mdtheme.yaml.
+Themes contain header.md/footer.md; Git sources default to main and refresh
+on every invocation. Never execute theme code or mutate source files.
+Check mode never writes project files. Pre-push never stages or commits.
 
-Compiled `dist/` remains committed for existing consumers of immutable Git revisions. Build and stage it with source changes; CI detects stale output.
-Do not add a prepare lifecycle. Package and CLI changes require verifying the
-packed artifact, not only workspace imports.
+Historical JavaScript Git revisions retain their dist files; new revisions
+build from Cargo sources. Keep the package free of browser dependencies and
+speculative plugin APIs. Package changes require an installed-consumer check.
+
+Standards 13's mdtheme checker still requires npm scripts and TypeScript
+configs. docs/standards-integration.md records that external incompatibility.
+Do not reintroduce Node files to satisfy the obsolete integration check.
 
 ---
 

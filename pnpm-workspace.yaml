@@ -1,5 +1,0 @@
-# Native resolver used by ESLint; the locked package only prepares its platform binding.
-allowBuilds:
-  unrs-resolver: true
-patchedDependencies:
-  "@sebastian-software/standards@0.10.0": patches/@sebastian-software__standards@0.10.0.patch

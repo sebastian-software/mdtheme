@@ -6,7 +6,7 @@
   </a>
 </p>
 
-[![npm mdtheme](https://img.shields.io/npm/v/mdtheme.svg?style=flat&label=npm%3A%20mdtheme)](https://www.npmjs.com/package/mdtheme) [![npm monthly downloads: mdtheme](https://img.shields.io/npm/dm/mdtheme.svg?style=flat&label=npm%20monthly%20downloads%3A%20mdtheme)](https://www.npmjs.com/package/mdtheme) [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/sebastian-software/mdtheme/ci.yml?style=flat)](https://github.com/sebastian-software/mdtheme/actions/workflows/ci.yml) [![Node.js >=24](https://img.shields.io/badge/Node.js-%3E%3D24-005164.svg?style=flat)](https://nodejs.org/) [![License: MIT](https://img.shields.io/badge/License-MIT-005164.svg?style=flat)](package.json)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/sebastian-software/mdtheme/ci.yml?style=flat)](https://github.com/sebastian-software/mdtheme/actions/workflows/ci.yml) [![Rust MSRV 1.96](https://img.shields.io/badge/Rust%20MSRV-1.96-005164.svg?style=flat)](https://www.rust-lang.org/) [![License: MIT](https://img.shields.io/badge/License-MIT-005164.svg?style=flat)](Cargo.toml)
 
 # mdtheme
 
@@ -15,107 +15,98 @@ footers, and badges by hand. `mdtheme` wraps your Markdown source in reusable
 themes and checks that the committed README is up to date. Your Markdown
 formatting stays as authored.
 
-You edit `README.md.src`. Readers see `README.md`. CI catches changes that have
-not been regenerated.
+You edit `README.md.src`. Readers see `README.md`. Use the native CLI in Rust,
+Node, or other projects without adding a JavaScript runtime or package manifest.
 
 ## Get started
 
-Use Node.js 24 or newer. Install `mdtheme` in your project:
+The native implementation is currently available from source. With Rust and
+Cargo installed, run this command from a checkout of this repository:
 
 ```sh
-npm install --save-dev mdtheme
+cargo install --path . --locked
 ```
 
-Create `README.md.src` with your project content. If you already have a README,
-copy its content into the source file first. Then generate and check the output:
+This installs `mdtheme` in Cargo's binary directory. Add that directory to your
+PATH if needed. crates.io packages, Homebrew installation, and downloadable
+release binaries are not available yet.
+
+In your project, create `README.md.src` with your content. If you already have
+a README, copy its content into the source file first. Generate and check it:
 
 ```sh
-npx mdtheme --write
-npx mdtheme --check
+mdtheme --write
+mdtheme --check
 ```
 
 No config is needed for this first step. The CLI reads `README.md.src` from the
-current directory and writes `README.md` with a generated-file
-notice. Your source file stays unchanged.
+current directory and writes `README.md` with a generated-file notice. Your
+source stays unchanged. Commit both files and run `mdtheme --check` in CI.
 
-Add these scripts to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "readme:write": "mdtheme --write",
-    "readme:check": "mdtheme --check"
-  }
-}
-```
-
-Commit both files. Run `npm run readme:write` after editing the source and
-`npm run readme:check` in CI. Check mode never writes: it exits with status 1
-when the output is missing or out of date, and 2 for invalid arguments or input.
+To regenerate automatically before pushing, add `mdtheme pre-push` to a Git hook.
+It blocks the push until the generated README and all worktree changes are
+committed. Follow the [pre-push setup guide](docs/pre-push.md).
 
 ## Add a theme
 
-A theme contributes opening and closing Markdown around your content. Add
-`mdtheme.config.ts` next to the source:
+A theme is a directory with `header.md`, `footer.md`, or both. Put your shared
+Markdown there and create `mdtheme.yaml` next to the source:
 
-```ts
-import { defineConfig } from "mdtheme";
-
-export default defineConfig({
-  themes: [
-    {
-      opening: "> Part of the Example project.\n",
-      closing: "Questions? [Open an issue](https://github.com/example/project/issues).\n",
-    },
-  ],
-});
+```yaml
+themes:
+  - directory: .mdtheme/company
 ```
 
-Run `npm run readme:write` again to include the frame. To reuse branding across
-repositories, export frames from a shared package or create ordinary TypeScript
-functions that return them. Themes wrap the source; they do not transform its
-content. The first theme in the array is the outermost frame.
+Run `mdtheme --write` to include the frame. For themes shared across repositories,
+use a Git source instead. This example uses a placeholder repository URL:
 
-For versions, downloads, licenses, CI, runtime requirements, and Rust library
-documentation badges derived from local project metadata, add
-`projectBadges(import.meta.url)` to `themes`. See the [badge guide](docs/badges.md)
-for imports, workspace discovery, and unpublished packages.
+```yaml
+themes:
+  - git: https://github.com/example/readme-theme.git
+    ref: main
+    path: markdown
+```
 
-Configs are trusted local code and can import theme factories. Review them like
-other build scripts. See [theme authoring](docs/theme-authoring.md) for reusable
-factories, nesting, and Markdown boundaries.
+Git sources require Git on PATH and access to the repository. `ref` defaults to
+`main`; branches, tags, and commit hashes are all supported. mdtheme fetches the
+requested revision on every run, so a branch follows new branding automatically.
+See [theme authoring and Git sources](docs/theme-authoring.md) for details.
+
+Add `badges: { enabled: true }` to derive package versions, downloads, licenses,
+CI, runtime requirements, and Rust documentation badges from project metadata.
+The [badge guide](docs/badges.md) covers package selection and unpublished projects.
 
 ## CLI and library
 
 ```text
 mdtheme --write [--config PATH]
 mdtheme --check [--config PATH]
+mdtheme pre-push [--config PATH]
 mdtheme --help
 mdtheme --version
 ```
 
-The CLI discovers `mdtheme.config.ts`, `.mts`, `.js`, or `.mjs` in the current
-directory. Use `--config PATH` to select a config elsewhere. Source and output
-must be in the config directory, and the output must be named `README.md`.
+The CLI discovers `mdtheme.yaml` or `mdtheme.yml` in the current directory.
+Check mode never writes the source or output: it exits with status 1 when the
+README is missing or out of date, and 2 when input or generation fails.
 
-For a build script that already has Markdown text, call the async
-`renderMarkdown(source, themes)` API. It returns the composed Markdown without
-reading or writing files. See [usage and CI](docs/usage.md) for the full example
-and exit statuses.
+A Rust library exposes `mdtheme::render` for composing text without filesystem
+access. See [usage and CI](docs/usage.md) for configuration and an API example.
+Users of the earlier npm package should follow the [migration guide](docs/migration.md).
 
 ## This README
 
-This repository uses its own CLI with
-[`sebastian-theme`](https://github.com/sebastian-software/sebastian-theme).
-Edit [`README.md.src`](README.md.src), then run `pnpm readme:write`.
-The [repository config](mdtheme.config.ts) selects the company frame;
-`pnpm readme:check` verifies the committed result in CI.
+Edit [`README.md.src`](README.md.src), then run `cargo run -- --write`.
+The [repository config](mdtheme.yaml) selects a local company frame;
+`cargo run -- --check` verifies the committed result.
 
 ## More documentation
 
 - [Usage and CI](docs/usage.md)
-- [Authoring theme factories](docs/theme-authoring.md)
-- [Maintaining the package](docs/maintaining.md)
+- [Pre-push setup](docs/pre-push.md)
+- [Theme authoring and Git sources](docs/theme-authoring.md)
+- [Migration from TypeScript](docs/migration.md)
+- [Maintaining mdtheme](docs/maintaining.md)
 - [Architecture decisions](docs/adr/README.md)
 - [Neutral examples](examples/neutral)
 

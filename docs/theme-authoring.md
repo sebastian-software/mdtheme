@@ -1,88 +1,86 @@
-# Authoring theme factories
+# Theme authoring and Git sources
 
-A theme is a `MarkdownFrame`:
+A theme is a directory containing `header.md`, `footer.md`, or both. The files
+contain literal UTF-8 Markdown or HTML. mdtheme places the header before the
+source and the footer after it. It does not execute scripts or expand placeholders.
 
-```ts
-export type MarkdownFrame = {
-  opening: string;
-  closing: string;
-};
+For a local theme, create `.mdtheme/company/header.md` with your opening text,
+then select it in `mdtheme.yaml`:
+
+```yaml
+themes:
+  - directory: .mdtheme/company
 ```
 
-Opening and closing strings are plain Markdown or HTML text. They are literal
-frame boundaries; theme code does not transform the source document. A factory
-is simply a function that returns a frame:
+Paths are relative to the config directory. Commit local theme files alongside
+your source. A directory with neither file is an error; an empty file is allowed.
 
-```ts
-import type { MarkdownFrame } from "mdtheme";
+## Share a theme through Git
 
-export function noticeFrame(label: string): MarkdownFrame {
-  return {
-    opening: `> **${label}**\n>\n`,
-    closing: "\n",
-  };
-}
+Put the same files in a Git repository. Use its URL in the config; the repository
+below is a placeholder for your own theme:
+
+```yaml
+themes:
+  - git: https://github.com/example/readme-theme.git
+    ref: main
+    path: markdown
 ```
 
-Use the public package root for imports. Factories do not need a plugin
-manifest, registration call, React component, or web runtime.
+`git` identifies the repository. `ref` defaults to `main` and accepts branches,
+tags, commit hashes, and revisions Git can resolve from the fetched repository.
+`path` is optional; omit it when the theme files are at the repository root.
+The selected directory and files must stay inside the checkout. Submodules are
+not fetched.
 
-## Boundaries and order
+mdtheme uses the installed Git command and your normal Git authentication.
+Private repositories must be accessible in the environment running mdtheme,
+including CI. Git terminal prompts are disabled, so configure credentials before
+running the command. Prefer your existing credential helper or SSH setup over embedding
+credentials in config URLs.
 
-The renderer emits frames in array order and closes them in reverse order. This
-makes the first frame the outermost frame:
+Each write, check, or clean pre-push invocation fetches the requested revision
+into a temporary directory outside the project. It tries a shallow fetch first
+and falls back to full history when needed to resolve the revision. Temporary
+files are removed after generation. There is no persistent cache, offline
+fallback, or theme lockfile. An unavailable repository or revision fails the
+command and leaves the existing README untouched.
 
-```ts
-const themes = [outerFrame(), innerFrame()];
-// opening: outer, inner
-// source
-// closing: inner, outer
+Following `main` is supported and is the default. New commits become visible on
+the next run. Tags offer a named release but can also move. Use a full commit
+hash when a fixed revision matters. mdtheme leaves that choice to the project.
+
+## Boundaries and nesting
+
+Themes are supplied outermost first and closed in reverse order:
+
+```yaml
+themes:
+  - directory: themes/outer
+  - directory: themes/inner
 ```
 
-An empty `opening` or `closing` is valid. Include deliberate newlines at the
-boundary so the source's first heading and last paragraph remain valid Markdown
-inside the frame. The renderer supplies blank-line section boundaries between
-nonempty frame parts and the source; indentation and newlines that belong
-inside your Markdown or HTML fragment remain the factory's responsibility.
+The result contains the outer header, inner header, source, inner footer, and
+outer footer. Enabled project badges appear immediately before the source,
+inside all selected themes.
+
 Source and frame text are preserved, including line endings and trailing
-whitespace. The renderer adds LF line breaks only where section boundaries
-need them; it does not normalize line endings or add a final newline. Include
-a final newline in your source or last closing fragment if you want one.
+whitespace. The renderer supplies LF blank-line boundaries between nonempty
+parts. It does not normalize existing line endings or add a final newline.
+Authors control formatting and whether their Markdown or HTML wrappers render
+correctly on the target host.
 
-HTML wrappers should be valid around the Markdown they contain. A wrapper that
-opens a raw HTML block and never closes it can change how a renderer treats all
-following content. If a value comes from a project setting, escape it before
-placing it in an HTML attribute or tag.
+## Try the example
 
-## Neutral examples
+The [neutral example](../examples/neutral) includes two local themes and a YAML
+config. With the native CLI installed, run:
 
-This repository includes small, dependency-free factories in
-[`examples/neutral/theme-factory.ts`](../examples/neutral/theme-factory.ts):
-
-```ts
-import { defineConfig } from "mdtheme";
-import { detailsFrame, noticeFrame } from "./theme-factory.ts";
-
-export default defineConfig({
-  themes: [detailsFrame("Project notes"), noticeFrame("Read first")],
-});
+```sh
+cd examples/neutral
+mdtheme --write
+mdtheme --check
 ```
 
-These frames demonstrate string boundaries only. They do not claim to be a
-site theme or a component library. Copy the pattern into a project and choose
-the Markdown or HTML framing that its renderer supports.
-
-## Test a factory
-
-The direct API is convenient for a focused test:
-
-```ts
-import { renderMarkdown } from "mdtheme";
-import { noticeFrame } from "./theme-factory.ts";
-
-const result = await renderMarkdown("# Heading\n", [noticeFrame("Example")]);
-```
-
-Keep factories deterministic. Do not fetch data, read the clock, or mutate
-global state while producing a frame; deterministic factories make `--check`
-useful in CI.
+The nested details and notice frames demonstrate boundaries without a theme
+package or script runtime. The [Rust API](usage.md#compose-text-in-rust) also
+lets you test frames as strings.

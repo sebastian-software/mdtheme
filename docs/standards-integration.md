@@ -1,26 +1,26 @@
-# Standards README ownership bridge
+# Standards integration
 
-The pinned `@sebastian-software/standards@0.10.0` release predates the explicit
-`readme.owner` support. This repository applies a narrow pnpm patch to that
-exact version so its generated README has one owner today.
+The TypeScript implementation used `@sebastian-software/standards@0.10.0` with a
+narrow pnpm patch for explicit README ownership. That bridge came from
+[standards PR #81](https://github.com/sebastian-software/standards/pull/81), commit
+`30d7215`, plus local mdtheme rename adjustments.
 
-The source change is [standards PR #81](https://github.com/sebastian-software/standards/pull/81),
-commit `30d7215`. The patch contains only its compiled `apply.js`, `check.js`,
-`init.js`, `repo.js`, and new `readme.js`; it does not change reference files,
-managed marker contents, the manifest version, or legacy repository behavior.
-The full upstream gate passed, including 219 tests.
+The native port removes the Node dependency, pnpm patch, and Node-specific
+validation path. The old bridge is historical context, not a requirement for
+running or developing the Rust CLI. Git history retains the patch if an older
+JavaScript revision needs maintenance.
 
-`pnpm install --frozen-lockfile` applies the tracked patch and verifies the
-lockfile hash. Both `standards check` and `readme:check` run in this repository's
-CI. The theme repository additionally verifies actual apply/check/write
-interoperability in a scratch consumer.
+`README.md.src` and `mdtheme.yaml` now define this repository's README generation.
+The generated file remains owned by mdtheme. Do not introduce another tool that
+rewrites its framing. Native checks are documented in [maintaining mdtheme](maintaining.md).
 
-When a standards release includes PR #81, update the exact dependency pin,
-remove its `patchedDependencies` entry and the corresponding patch file, refresh
-the lockfile, and run the full repository gate. Keep the `readme.owner` opt-in
-and README check scripts. Do not remove the bridge while pinned to 0.10.0.
+Existing standards-managed files and marker sections remain subject to their
+repository guardrails. A future Rust standards integration should use the
+supported upstream configuration and preserve mdtheme's README ownership;
+it should not restore the old npm dependency solely to run README generation.
 
-The local `mdtheme` rename also updates the patch's config filenames, CLI commands,
-and generated-file notice. The `markdown-themer` ownership identifier remains
-unchanged for compatibility. These rename adjustments are not part of the
-original upstream patch.
+The Rust standards reference files have been applied. The current standards 13
+README ownership check still expects an npm dependency and a TypeScript config.
+It does not recognize the native YAML setup yet. That upstream incompatibility
+remains unresolved; the repository gate uses Cargo and mdtheme's own README
+check rather than claiming standards consistency passes.

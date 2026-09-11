@@ -1,19 +1,18 @@
-# Commit built output for Git consumers
+# Build native artifacts from source
 
 - Status: accepted
-- Updated: 2026-09-10
+- Updated: 2026-09-11
 
-Commit `dist/` alongside source changes so consumers can install an immutable
-Git revision without compiling the package. The npm package also exposes its
-compiled ESM entry points and TypeScript declarations from `dist/`.
+Commit Rust source and `Cargo.lock`; do not commit compiled binaries or `target/`.
+Source consumers build with Cargo. Verify package contents and installation in
+addition to workspace tests so missing files and packaging errors are caught.
 
-The alternative is a `prepare` lifecycle that builds during installation.
-Keeping compiled output makes installation independent of a consumer's build
-tools and avoids running that lifecycle. The cost is generated changes in
-reviews and a responsibility to keep them aligned with source.
+The TypeScript implementation committed `dist/` so immutable Git dependencies
+worked without an installation lifecycle. That contract remains true for those
+historical revisions. The native port removes `dist/` and replaces npm imports
+with a Rust library and executable. New Git consumers need a Rust toolchain to
+build source; future downloadable binaries can remove that installation step.
 
-The build and `check:dist` gate detect stale committed output. The packed
-consumer verifies CLI execution, TypeScript configs, public types, and API
-imports after installation. Workspace tests alone cannot establish that the
-published files work. Revisit this decision if immutable Git installs are no
-longer supported.
+This living record keeps its original filename for existing links. Revisit the
+artifact strategy when native release channels are implemented, and verify each
+advertised installation path before publishing its documentation.
