@@ -30,7 +30,10 @@ for local use and CI. The Cargo commands below continue to validate the current
 source implementation.
 
 The editable project corpus is `README.md.src`. The YAML config selects the
-local company theme. After changing either, run:
+shared `sebastian-theme` Git repository at `main`, using its `markdown/`
+directory. Update shared branding in that repository; this project keeps no
+local copy. Generation needs Git and access to that repository. After changing
+the source or adopting a theme update, run:
 
 ```sh
 cargo run -- --write

@@ -1,5 +1,7 @@
 themes:
-  - directory: .mdtheme/company
+  - git: https://github.com/sebastian-software/sebastian-theme.git
+    ref: main
+    path: markdown
 badges:
   enabled: true
   published: false
