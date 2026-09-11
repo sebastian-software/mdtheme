@@ -38,3 +38,29 @@ jobs:
           test -n "$msrv"
           rustup toolchain install "$msrv" --profile minimal
           cargo +"$msrv" test --locked --workspace --all-features
+
+  project-tools:
+    name: Project tools (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up mise
+        uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3
+        with:
+          version: 2026.9.5
+          install_args: --locked
+      - name: Check README with the project pin
+        run: mise run readme:check
+      - name: Set up Python for integration tests
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: Verify isolated version resolution and installation failures
+        shell: bash
+        run: |
+          python scripts/test-project-tools.py ProjectToolsTest.test_missing_installation_never_runs_global_binary
+          python scripts/test-project-tools.py
