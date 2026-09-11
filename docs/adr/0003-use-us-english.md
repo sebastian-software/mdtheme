@@ -14,8 +14,13 @@ more conversational, but that voice must not remove details readers need to
 use the tool correctly. Avoid promotional claims that the project cannot
 support with evidence.
 
-The README primarily serves maintainers who keep READMEs consistent across
-repositories. Lead with that task and a short working example; link to guides
-for library use, theme directories and Git sources, and badge configuration. This favors a fast
-first result over presenting the entire API at the entry point. Revisit this
-structure if the primary audience changes.
+The README primarily serves maintainers adopting mdtheme in their own projects.
+Lead with the benefit of shared README content, then give a working path from
+tool setup to authored source, theme, generated output, and CI. Project-owned
+version selection is part of that onboarding path. Explain the files readers
+need to add and the result they should see.
+
+Keep implementation languages, runtime comparisons, migration history, and
+mdtheme contributor setup out of the onboarding flow. Link to their owning
+guides where needed. This favors completing a project task over presenting the
+entire API at the entry point. Revisit this structure if the audience changes.
