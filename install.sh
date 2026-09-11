@@ -71,7 +71,7 @@ tar -xzf "$scratch/$archive" -C "$scratch" mdtheme
 chmod 755 "$scratch/mdtheme"
 installed_version=$("$scratch/mdtheme" --version) || fail 'This binary cannot run on your system. Try building from source.'
 if [ "$version" != latest ]; then
-  [ "$installed_version" = "mdtheme $version" ] || fail 'Binary version does not match the requested release'
+  [ "$installed_version" = "$version" ] || fail 'Binary version does not match the requested release'
 fi
 mkdir -p "$bin_dir"
 staged=$(mktemp "$bin_dir/.mdtheme.XXXXXX")

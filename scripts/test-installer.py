@@ -26,7 +26,7 @@ shift
 done
 cp "$FIXTURES/${url##*/}" "$output"''')
         self.binary = self.root / 'mdtheme'
-        self.binary.write_text('#!/bin/sh\necho "mdtheme 0.3.0"\n')
+        self.binary.write_text('#!/bin/sh\necho "0.3.0"\n')
         self.archive = self.root / 'mdtheme-x86_64-unknown-linux-gnu.tar.gz'
         with tarfile.open(self.archive, 'w:gz') as archive:
             archive.add(self.binary, arcname='mdtheme')
@@ -50,7 +50,18 @@ cp "$FIXTURES/${url##*/}" "$output"''')
     def test_versioned_install(self):
         result = self.run_install('--version', '0.3.0')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(subprocess.check_output([str(self.destination / 'mdtheme'), '--version'], text=True).strip(), 'mdtheme 0.3.0')
+        self.assertEqual(subprocess.check_output([str(self.destination / 'mdtheme'), '--version'], text=True).strip(), '0.3.0')
+
+    def test_actual_cli_version_contract(self):
+        binary = INSTALLER.parent / 'target/debug/mdtheme'
+        self.assertTrue(binary.is_file(), 'Build mdtheme before running installer tests')
+        version = subprocess.check_output([str(binary), '--version'], text=True).strip()
+        with tarfile.open(self.archive, 'w:gz') as archive:
+            archive.add(binary, arcname='mdtheme')
+        digest = hashlib.sha256(self.archive.read_bytes()).hexdigest()
+        (self.root / 'SHA256SUMS').write_text(f'{digest}  {self.archive.name}\n')
+        result = self.run_install('--version', version)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_latest_install(self):
         self.assertEqual(self.run_install().returncode, 0)
