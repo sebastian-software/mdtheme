@@ -55,6 +55,12 @@ jobs:
           install_args: --locked
       - name: Check README with the project pin
         run: mise run readme:check
+      - name: Set up Python for integration tests
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
       - name: Verify isolated version resolution and installation failures
         shell: bash
-        run: python3 scripts/test-project-tools.py
+        run: |
+          python scripts/test-project-tools.py ProjectToolsTest.test_missing_installation_never_runs_global_binary
+          python scripts/test-project-tools.py

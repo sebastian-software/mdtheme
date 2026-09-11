@@ -35,6 +35,27 @@ To regenerate automatically before pushing, add `mdtheme pre-push` to a Git hook
 It blocks the push until the generated README and all worktree changes are
 committed. Follow the [pre-push setup guide](docs/pre-push.md).
 
+## Pin the CLI for your project
+
+For a shared repository, pin mdtheme with [mise](https://mise.jdx.dev/). Each
+project chooses its own CLI version, and contributors and CI use that same
+version. mise stores the binaries outside your repository; you commit only
+`mise.toml` and `mise.lock`. No Node manifest or standards setup is required.
+
+Follow the [project setup guide](docs/project-tools.md) to add the version pin,
+checksum lockfile, and README tasks. After setup, use:
+
+```sh
+mise run readme:write
+mise run readme:check
+mise run readme:pre-push
+```
+
+The tasks fail if the pinned version is missing. Install it explicitly with
+`mise install --locked`; checks never download a replacement or use a different
+global installation. Homebrew remains a convenient option for trying mdtheme
+or using it without a project pin.
+
 ## Add a theme
 
 A theme is a directory with `header.md`, `footer.md`, or both. Put your shared
@@ -91,6 +112,7 @@ The [repository config](mdtheme.yaml) selects a local company frame;
 ## More documentation
 
 - [Installation](docs/installation.md)
+- [Project-pinned tools with mise](docs/project-tools.md)
 - [Usage and CI](docs/usage.md)
 - [Pre-push setup](docs/pre-push.md)
 - [Theme authoring and Git sources](docs/theme-authoring.md)

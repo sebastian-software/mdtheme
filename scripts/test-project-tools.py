@@ -61,6 +61,10 @@ class ProjectToolsTest(unittest.TestCase):
         self.assertEqual((self.project / 'README.md.src').read_bytes(), source)
 
     def test_missing_installation_never_runs_global_binary(self):
+        # Make this test independent of execution order. A fallback to the real
+        # Windows binary must succeed, so failure cannot masquerade as rejection.
+        generated = self.run_mise('run', 'readme:write', extra={'MISE_OFFLINE': 'true'})
+        self.assertEqual(generated.returncode, 0, generated.stderr)
         fake_bin = self.root / 'global-bin'
         fake_bin.mkdir(exist_ok=True)
         marker = self.root / 'fallback-ran'
@@ -70,14 +74,19 @@ class ProjectToolsTest(unittest.TestCase):
         if os.name == 'nt':
             resolved = self.run_mise('which', 'mdtheme')
             self.assertEqual(resolved.returncode, 0, resolved.stderr)
-            shutil.copyfile(resolved.stdout.strip(), fake_bin / 'mdtheme.exe')
+            windows_fallback = fake_bin / 'mdtheme.exe'
+            shutil.copyfile(resolved.stdout.strip(), windows_fallback)
+            control = subprocess.run([str(windows_fallback), '--check'], cwd=self.project,
+                                     env=self.env, text=True, capture_output=True)
+            self.assertEqual(control.returncode, 0, control.stderr)
         empty = self.root / 'empty-data'
         result = self.run_mise('run', 'readme:check', extra={
             'MISE_DATA_DIR': str(empty), 'MISE_OFFLINE': 'true',
             'PATH': str(fake_bin) + os.pathsep + self.env['PATH'],
         })
         self.assertNotEqual(result.returncode, 0, result.stderr)
-        self.assertFalse(marker.exists(), 'A global mdtheme was executed')
+        if os.name != 'nt':
+            self.assertFalse(marker.exists(), 'A global mdtheme was executed')
         self.assertFalse(any(empty.rglob('mdtheme.exe')))
         self.assertFalse(any(p.is_file() for p in empty.rglob('mdtheme')))
 
