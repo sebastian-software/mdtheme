@@ -94,7 +94,9 @@ impl Config {
             .map(|theme| themes::load(theme, &self.directory))
             .collect::<Result<Vec<_>>>()?;
         if self.document.badges.enabled {
-            frames.push(project_badges(&self.directory, &self.document.badges)?);
+            let mut badges = project_badges(&self.directory, &self.document.badges)?;
+            badges.badges_prepend = std::mem::take(&mut badges.opening);
+            frames.push(badges);
         }
         Ok(frames)
     }

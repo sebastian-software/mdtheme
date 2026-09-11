@@ -15,7 +15,7 @@ available; new native releases use Cargo and downloadable binaries.
 
 Discover mdtheme.yaml or mdtheme.yml. Defaults remain README.md.src and README.md.
 A theme is a directory containing header.md and footer.md (either may be omitted,
-but at least one must exist). Configuration selects local directories or Git
+but at least one supported fragment must exist). Configuration selects local directories or Git
 repositories with an optional ref and subdirectory. Do not execute theme code,
 expand templates, recurse into submodules, or invent a theme registry.
 
@@ -50,3 +50,20 @@ This repository consumes the company frame from `sebastian-theme` through its
 do not duplicate it locally. The dependency is Markdown data fetched by Git,
 independent of the tool version chosen in mise. Branding changes are reviewed
 and merged in the theme repository before regenerating this README.
+
+Theme badge fragments are part of the data-only composition contract. Optional
+`badges-prepend.md` and `badges-append.md` files can constitute a theme on their
+own. Compose prepends outer-first and appends inner-first around generated
+metadata badges and then authored badges. An explicit, single ordered
+`mdtheme:badges:start` / `mdtheme:badges:end` HTML-comment pair selects placement
+in the source; without it, use the existing position before the source.
+Reject malformed or duplicate markers. Trim fragment boundaries and join with
+spaces, preserving interior text and all source outside the slot. Never change
+the source file. Existing header/footer-only themes retain their behavior.
+
+Explicit placement avoids guessing which Markdown images or HTML containers
+are badges. Authors own inline syntax and HTML compatibility; the tool does not
+parse, convert, or deduplicate badge markup. The consequence is a small opt-in
+source edit for projects with authored badge rows. Tests cover nested ordering,
+legacy output parity, Git badge-only themes, metadata integration, source
+preservation, and failure without output replacement.

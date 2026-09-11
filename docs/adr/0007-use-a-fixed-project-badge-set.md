@@ -39,3 +39,20 @@ The native YAML interface enables this feature through `badges.enabled`. Badges
 appear immediately before the source, inside all theme frames. Discovery is
 relative to the config directory. The implementation language does not change
 the standard set or the meaning of publication and workspace options.
+
+Theme badge fragments are part of the data-only composition contract. Optional
+`badges-prepend.md` and `badges-append.md` files can constitute a theme on their
+own. Compose prepends outer-first and appends inner-first around generated
+metadata badges and then authored badges. An explicit, single ordered
+`mdtheme:badges:start` / `mdtheme:badges:end` HTML-comment pair selects placement
+in the source; without it, use the existing position before the source.
+Reject malformed or duplicate markers. Trim fragment boundaries and join with
+spaces, preserving interior text and all source outside the slot. Never change
+the source file. Existing header/footer-only themes retain their behavior.
+
+Explicit placement avoids guessing which Markdown images or HTML containers
+are badges. Authors own inline syntax and HTML compatibility; the tool does not
+parse, convert, or deduplicate badge markup. The consequence is a small opt-in
+source edit for projects with authored badge rows. Tests cover nested ordering,
+legacy output parity, Git badge-only themes, metadata integration, source
+preservation, and failure without output replacement.

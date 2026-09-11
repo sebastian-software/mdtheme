@@ -83,6 +83,7 @@ fn main() -> anyhow::Result<()> {
     let frames = [Frame {
         opening: "> Part of the Example project.\n".into(),
         closing: "Questions? Open an issue.\n".into(),
+        ..Frame::default()
     }];
     let markdown = render("# Example\n", &frames, "README.md.src")?;
     println!("{markdown}");

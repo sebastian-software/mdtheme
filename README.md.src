@@ -1,7 +1,7 @@
 # mdtheme
 
 Keep shared branding, support links, and badges consistent across your projects.
-mdtheme combines each project's own Markdown with reusable headers and footers,
+mdtheme combines each project's own Markdown with reusable headers, footers, and theme badges,
 then checks that the committed README matches its sources.
 
 Write your project documentation in `README.md.src`. Keep shared content in a

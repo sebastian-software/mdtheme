@@ -144,13 +144,17 @@ fn read_frame(root: &Path) -> Result<Frame> {
     ensure!(root.is_dir(), "Theme must be a directory");
     let header = fragment(root, "header.md")?;
     let footer = fragment(root, "footer.md")?;
+    let prepend = fragment(root, "badges-prepend.md")?;
+    let append = fragment(root, "badges-append.md")?;
     ensure!(
-        header.is_some() || footer.is_some(),
-        "Theme must contain header.md or footer.md"
+        header.is_some() || footer.is_some() || prepend.is_some() || append.is_some(),
+        "Theme must contain header.md, footer.md, badges-prepend.md, or badges-append.md"
     );
     Ok(Frame {
         opening: header.unwrap_or_default(),
         closing: footer.unwrap_or_default(),
+        badges_prepend: prepend.unwrap_or_default(),
+        badges_append: append.unwrap_or_default(),
     })
 }
 
