@@ -10,126 +10,128 @@
 
 # mdtheme
 
-Keep README branding consistent across repositories without copying headers,
-footers, and badges by hand. `mdtheme` wraps your Markdown source in reusable
-themes and checks that the committed README is up to date. Your Markdown
-formatting stays as authored.
+Keep shared branding, support links, and badges consistent across your projects.
+mdtheme combines each project's own Markdown with reusable headers and footers,
+then checks that the committed README matches its sources.
 
-You edit `README.md.src`. Readers see `README.md`. Use the native CLI in Rust,
-Node, or other projects without adding a JavaScript runtime or package manifest.
+Write your project documentation in `README.md.src`. Keep shared content in a
+theme. mdtheme produces the `README.md` your readers see, preserving your authored
+Markdown formatting. When shared content changes, regenerate, review the diff,
+and commit it with your project.
 
-## Get started
+## Add mdtheme to your project
 
-Install with Homebrew:
+Use [mise](https://mise.jdx.dev/) to pin the CLI version for your repository.
+Contributors and CI use that same version, while other projects can choose their
+own. Installed binaries stay outside your repository.
 
-```sh
-brew install sebastian-software/tap/mdtheme
-```
+### 1. Set up the tool
 
-Or use the [shell installer, release archives, or Cargo from source](docs/installation.md).
-The native binary works without Node or Rust installed.
+[Install mise](https://mise.jdx.dev/getting-started.html), then copy
+[`mise.toml`](mise.toml) and [`mise.lock`](mise.lock) from this repository into
+your project root. They contain the version pin, archive checksums, and README
+tasks used below. If your project already uses mise, follow the
+[configuration guide](docs/project-tools.md#add-mdtheme-to-your-project) to merge
+the entries into your existing setup.
 
-In your project, create `README.md.src` with your content. If you already have
-a README, copy its content into the source file first. Generate and check it:
-
-```sh
-mdtheme --write
-mdtheme --check
-```
-
-No config is needed for this first step. The CLI reads `README.md.src` from the
-current directory and writes `README.md` with a generated-file notice. Your
-source stays unchanged. Commit both files and run `mdtheme --check` in CI.
-
-To regenerate automatically before pushing, add `mdtheme pre-push` to a Git hook.
-It blocks the push until the generated README and all worktree changes are
-committed. Follow the [pre-push setup guide](docs/pre-push.md).
-
-## Pin the CLI for your project
-
-For a shared repository, pin mdtheme with [mise](https://mise.jdx.dev/). Each
-project chooses its own CLI version, and contributors and CI use that same
-version. mise stores the binaries outside your repository; you commit only
-`mise.toml` and `mise.lock`. No Node manifest or standards setup is required.
-
-Follow the [project setup guide](docs/project-tools.md) to add the version pin,
-checksum lockfile, and README tasks. After setup, use:
+Review the configuration, then run these commands from your project root:
 
 ```sh
-mise run readme:write
-mise run readme:check
-mise run readme:pre-push
+mise trust
+mise install --locked
 ```
 
-The tasks fail if the pinned version is missing. Install it explicitly with
-`mise install --locked`; checks never download a replacement or use a different
-global installation. Homebrew remains a convenient option for trying mdtheme
-or using it without a project pin.
+The tasks use Bash; on Windows, use Git Bash. For a standalone installation,
+see [Homebrew, the shell installer, and release downloads](docs/installation.md).
 
-## Add a theme
+### 2. Add your content and theme
 
-A theme is a directory with `header.md`, `footer.md`, or both. Put your shared
-Markdown there and create `mdtheme.yaml` next to the source:
+Create `README.md.src` with your project documentation. If you already have a
+README, copy its authored content into this source file.
+
+A theme is a directory containing `header.md`, `footer.md`, or both. For example,
+create `.mdtheme/company/footer.md` with the support links you want readers to see:
+
+```md
+---
+
+Questions? Open an issue in this repository.
+```
+
+Create `mdtheme.yaml` in your project root:
 
 ```yaml
 themes:
   - directory: .mdtheme/company
 ```
 
-Run `mdtheme --write` to include the frame. For themes shared across repositories,
-use a Git source instead. This example uses a placeholder repository URL:
+You can leave out the config to generate a README without a theme.
+
+### 3. Generate and commit your README
+
+```sh
+mise run readme:write
+mise run readme:check
+```
+
+Open `README.md` to see your content followed by the theme's footer. Commit it
+alongside `README.md.src`, `mdtheme.yaml`, `mise.toml`, `mise.lock`, and your theme
+files. Continue editing the source and theme files, then regenerate the README.
+Check mode reports missing or stale output without rewriting it.
+
+## Share a theme across repositories
+
+Put shared `header.md` and `footer.md` files in a Git repository. In each project's
+`mdtheme.yaml`, select that repository instead of a local directory. Replace the
+example URL below with your theme repository:
 
 ```yaml
 themes:
   - git: https://github.com/example/readme-theme.git
     ref: main
-    path: markdown
 ```
 
-Git sources require Git on PATH and access to the repository. `ref` defaults to
-`main`; branches, tags, and commit hashes are all supported. mdtheme fetches the
-requested revision on every run, so a branch follows new branding automatically.
-See [theme authoring and Git sources](docs/theme-authoring.md) for details.
+Git must be installed and able to access the repository. mdtheme fetches the
+selected revision on every run. Follow a branch to pick up shared changes when
+you regenerate, or choose a tag or commit to keep the theme fixed. The theme
+revision and the project's CLI version are independent.
 
-Add `badges: { enabled: true }` to derive package versions, downloads, licenses,
-CI, runtime requirements, and Rust documentation badges from project metadata.
-The [badge guide](docs/badges.md) covers package selection and unpublished projects.
+See [theme authoring](docs/theme-authoring.md) for multiple themes and themes
+stored in a repository subdirectory.
 
-## CLI and library
+## Keep the README current
 
-```text
-mdtheme --write [--config PATH]
-mdtheme --check [--config PATH]
-mdtheme pre-push [--config PATH]
-mdtheme --help
-mdtheme --version
-```
+Add the [CI setup](docs/project-tools.md#use-the-same-pin-in-github-actions) to
+install your project's pinned tool, then run `mise run readme:check` in CI.
+A failed check tells you to regenerate the README and commit the result.
 
-The CLI discovers `mdtheme.yaml` or `mdtheme.yml` in the current directory.
-Check mode never writes the source or output: it exits with status 1 when the
-README is missing or out of date, and 2 when input or generation fails.
+For local feedback before pushing, add `mise run readme:pre-push` to your Git
+hook. It regenerates from a clean worktree and blocks the push if there are
+changes to commit. Follow the [pre-push guide](docs/pre-push.md) to preserve any
+existing hooks.
 
-A Rust library exposes `mdtheme::render` for composing text without filesystem
-access. See [usage and CI](docs/usage.md) for configuration and an API example.
-Users of the earlier npm package should follow the [migration guide](docs/migration.md).
+If the pinned CLI is missing, run `mise install --locked` to install it. README
+tasks never download a replacement or fall back to another global version.
 
-## This README
+## Add project badges
 
-Edit [`README.md.src`](README.md.src), then run `cargo run -- --write`.
-The [repository config](mdtheme.yaml) selects a local company frame;
-`cargo run -- --check` verifies the committed result.
+Add `badges: { enabled: true }` to `mdtheme.yaml` to generate badges from your
+project metadata, including package versions, downloads, licenses, and CI status.
+The [badge guide](docs/badges.md) explains the available badges, package selection,
+and unpublished projects.
 
-## More documentation
+## Documentation
 
-- [Installation](docs/installation.md)
-- [Project-pinned tools with mise](docs/project-tools.md)
-- [Usage and CI](docs/usage.md)
-- [Pre-push setup](docs/pre-push.md)
+- [Project setup, version updates, and CI](docs/project-tools.md)
+- [Installation options](docs/installation.md)
+- [Configuration and CLI reference](docs/usage.md)
 - [Theme authoring and Git sources](docs/theme-authoring.md)
-- [Migration from TypeScript](docs/migration.md)
-- [Maintaining mdtheme](docs/maintaining.md)
-- [Architecture decisions](docs/adr/README.md)
-- [Neutral examples](examples/neutral)
+- [Pre-push setup](docs/pre-push.md)
+- [Project badges](docs/badges.md)
+- [Examples](examples/neutral)
+
+To contribute to mdtheme itself, see the [maintainer guide](docs/maintaining.md)
+and [architecture decisions](docs/adr/README.md).
 
 ---
 
