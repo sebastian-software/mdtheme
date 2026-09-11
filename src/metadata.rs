@@ -186,22 +186,6 @@ fn validate_workspace_pattern(pattern: &str) -> Result<()> {
     Ok(())
 }
 
-// std::fs::canonicalize uses verbatim paths on Windows. The glob parser
-// treats the question mark in that prefix as a pattern and cannot traverse it.
-fn glob_root(root: &Path) -> String {
-    let path = root.to_string_lossy().into_owned();
-    #[cfg(windows)]
-    {
-        if let Some(share) = path.strip_prefix(r"\\?\UNC\") {
-            return format!(r"\\{share}");
-        }
-        if let Some(disk) = path.strip_prefix(r"\\?\") {
-            return disk.to_owned();
-        }
-    }
-    path
-}
-
 fn expand(root: &Path, patterns: &[String], filename: &str) -> Result<Vec<PathBuf>> {
     let mut included = BTreeSet::new();
     let mut excluded = BTreeSet::new();
@@ -212,7 +196,7 @@ fn expand(root: &Path, patterns: &[String], filename: &str) -> Result<Vec<PathBu
             .map_or((false, pattern.as_str()), |s| (true, s));
         let pattern = format!(
             "{}/{}/{}",
-            glob::Pattern::escape(&glob_root(root)),
+            glob::Pattern::escape(&crate::paths::external_path(root)),
             pattern.trim_end_matches('/'),
             filename
         );

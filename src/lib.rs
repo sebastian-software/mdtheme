@@ -4,6 +4,7 @@ pub mod badges;
 pub mod config;
 pub mod files;
 pub mod metadata;
+mod paths;
 pub mod pre_push;
 pub mod themes;
 

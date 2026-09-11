@@ -174,7 +174,7 @@ pub fn load(theme: &Theme, config_dir: &Path) -> Result<Frame> {
             // Resolve local Git paths against the config, not the temporary checkout.
             let local_url = config_dir.join(url);
             let source = if local_url.exists() {
-                local_url.canonicalize()?.to_string_lossy().into_owned()
+                crate::paths::external_path(&local_url.canonicalize()?)
             } else {
                 url.clone()
             };
