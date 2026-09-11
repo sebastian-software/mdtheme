@@ -10,7 +10,6 @@ if not re.fullmatch(r"mdtheme-v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", tag)
 print('class Mdtheme < Formula')
 print('  desc "Compose Markdown with reusable local and Git themes"')
 print('  homepage "https://github.com/sebastian-software/mdtheme"')
-print(f'  version "{tag.removeprefix("mdtheme-v")}"')
 print('  license "MIT"')
 print('\n  depends_on "git"')
 for system, suffix in [("macos", "apple-darwin"), ("linux", "unknown-linux-gnu")]:
