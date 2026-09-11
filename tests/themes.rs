@@ -169,3 +169,49 @@ fn rejects_remote_and_local_fragment_symlink_escapes() {
     .unwrap();
     expect(project.path(), "--write", 2);
 }
+
+#[test]
+fn git_badge_only_theme_joins_generated_and_authored_badges() {
+    let remote = repository();
+    fs::remove_file(remote.path().join("theme/header.md")).unwrap();
+    fs::write(
+        remote.path().join("theme/badges-prepend.md"),
+        "[![Brand](brand.svg)](https://example.com)\n",
+    )
+    .unwrap();
+    fs::write(remote.path().join("theme/badges-append.md"), "Tail\n").unwrap();
+    git(remote.path(), &["add", "."]);
+    git(remote.path(), &["commit", "-m", "badge-only theme"]);
+    let project = tempdir().unwrap();
+    config(project.path(), remote.path(), None, "theme");
+    let source =
+        "# Project\n\n<!-- mdtheme:badges:start -->\nOwn\n<!-- mdtheme:badges:end -->\n\nBody\n";
+    fs::write(project.path().join("README.md.src"), source).unwrap();
+    let path = project.path().join("mdtheme.yaml");
+    let mut cfg: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+    cfg["badges"] = serde_json::json!({"enabled": true, "published": false});
+    fs::write(path, serde_json::to_string(&cfg).unwrap()).unwrap();
+    fs::write(
+        project.path().join("Cargo.toml"),
+        "[package]\nname = 'demo'\nversion = '0.1.0'\nrust-version = '1.85'\n",
+    )
+    .unwrap();
+    expect(project.path(), "--write", 0);
+    let generated = output(project.path());
+    assert!(generated.contains("# Project\n\n[![Brand]"));
+    assert!(generated.contains("Rust MSRV"));
+    assert!(generated.contains(" Own Tail\n\nBody"));
+    expect(project.path(), "--check", 0);
+    assert_eq!(
+        fs::read_to_string(project.path().join("README.md.src")).unwrap(),
+        source
+    );
+    fs::write(
+        project.path().join("README.md.src"),
+        "<!-- mdtheme:badges:start -->",
+    )
+    .unwrap();
+    expect(project.path(), "--write", 2);
+    assert_eq!(output(project.path()), generated);
+}

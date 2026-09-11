@@ -200,5 +200,6 @@ pub fn project_badges(root: &Path, options: &BadgeOptions) -> Result<Frame> {
     Ok(Frame {
         opening: badges.join(" "),
         closing: String::new(),
+        ..Frame::default()
     })
 }

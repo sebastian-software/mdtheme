@@ -1,6 +1,7 @@
 # Theme authoring and Git sources
 
-A theme is a directory containing `header.md`, `footer.md`, or both. The files
+A theme is a directory containing any of `header.md`, `footer.md`,
+`badges-prepend.md`, and `badges-append.md`. The files
 contain literal UTF-8 Markdown or HTML. mdtheme places the header before the
 source and the footer after it. It does not execute scripts or expand placeholders.
 
@@ -13,7 +14,7 @@ themes:
 ```
 
 Paths are relative to the config directory. Commit local theme files alongside
-your source. A directory with neither file is an error; an empty file is allowed.
+your source. At least one of these files must exist; empty files are allowed.
 
 ## Share a theme through Git
 
@@ -64,7 +65,7 @@ The result contains the outer header, inner header, source, inner footer, and
 outer footer. Enabled project badges appear immediately before the source,
 inside all selected themes.
 
-Source and frame text are preserved, including line endings and trailing
+Outside explicit badge slots, source and frame text are preserved, including line endings and trailing
 whitespace. The renderer supplies LF blank-line boundaries between nonempty
 parts. It does not normalize existing line endings or add a final newline.
 Authors control formatting and whether their Markdown or HTML wrappers render
@@ -84,3 +85,45 @@ mdtheme --check
 The nested details and notice frames demonstrate boundaries without a theme
 package or script runtime. The [Rust API](usage.md#compose-text-in-rust) also
 lets you test frames as strings.
+
+## Add badges to the project badge row
+
+Put brand badges in `badges-prepend.md` to place them before project badges,
+or `badges-append.md` to place them after. These files contain literal inline
+Markdown or HTML, just like an authored badge row. A badge-only theme is valid.
+Move a badge out of `header.md` when adopting this feature to avoid duplicates.
+
+In `README.md.src`, mark the row where badges belong:
+
+```markdown
+# My project
+
+<!-- mdtheme:badges:start -->
+[![Build](https://example.com/build.svg)](https://example.com/build)
+<!-- mdtheme:badges:end -->
+
+Your project description goes here.
+```
+
+The generated README replaces the marker pair with one row: outer theme
+prepends, inner theme prepends, enabled metadata badges, authored badges,
+inner theme appends, then outer theme appends. An empty pair places generated
+badges without any authored badges. Theme badges work even when
+`badges.enabled` is false; that switch controls only metadata discovery.
+
+Without markers, the combined generated row appears after all headers and
+before the source. Existing authored badges elsewhere are not detected or moved.
+Only one ordered marker pair is allowed. Missing, reversed, or duplicate
+markers fail before writing. Marker strings are reserved, including in code
+examples in the source; link to this guide instead of quoting them there.
+
+The renderer trims the outside whitespace of each badge fragment and the
+marked row, then joins nonempty parts with a space. Interior text and all source
+outside the markers retain their bytes. The source file is never rewritten.
+Use inline content without blank paragraphs. For HTML badge containers, use
+HTML fragments throughout or move the row outside the container: GitHub does
+not render Markdown badge syntax inside every HTML block. mdtheme does not
+convert between HTML and Markdown or deduplicate badges.
+
+Rust callers can use `Frame.badges_prepend` and `Frame.badges_append` with
+`..Frame::default()` for omitted fields.

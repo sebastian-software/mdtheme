@@ -93,8 +93,10 @@ unreadable explicit package paths produce an input error.
 
 Selected themes are supplied outermost first and closed in reverse order.
 Enabled badges appear after all theme headers and immediately before the
-project source. They contribute no closing text. Brand attribution belongs in
-a theme header or footer.
+project source, or in an explicit badge slot in the source. Brand attribution
+belongs in a theme’s `badges-prepend.md` or `badges-append.md`. See
+[theme badge composition](theme-authoring.md#add-badges-to-the-project-badge-row)
+for placement, ordering, and authored badges.
 
 Badges are Markdown images and links. They do not install CSS, fonts, or a
 website layout; the host renders the document with its own styles.
