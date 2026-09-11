@@ -44,3 +44,9 @@ Node brace/extglob syntax is rejected with a diagnostic and explicit manifest
 paths remain available. Do not silently omit packages when a pattern cannot be
 interpreted. The rendering parity corpus was captured from TypeScript commit
 87efbe3 and is checked byte-for-byte by the native tests.
+
+This repository consumes the company frame from `sebastian-theme` through its
+`markdown/` directory on `main`. Shared brand text belongs to that repository;
+do not duplicate it locally. The dependency is Markdown data fetched by Git,
+independent of the tool version chosen in mise. Branding changes are reviewed
+and merged in the theme repository before regenerating this README.
