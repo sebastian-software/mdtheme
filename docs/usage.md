@@ -1,150 +1,112 @@
 # Usage
 
-`mdtheme` keeps an authored Markdown source separate from the output
-file that a repository publishes. The default pair is `README.md.src` and
-`README.md`. A config can change the source filename; CLI output is always
-named `README.md`.
+`mdtheme` keeps authored Markdown separate from the generated README. Install
+the native CLI from source as described in the [README](../README.md#get-started).
+Git is required for remote themes and `pre-push`. Local generation needs only
+the installed binary; no Node runtime or project `package.json` is required.
 
-## Install
+## Configure a project
 
-The package requires Node.js 24 or newer.
+Create `mdtheme.yaml` in your project directory:
 
-```sh
-npm install --save-dev mdtheme
+```yaml
+source: README.md.src
+output: README.md
+themes:
+  - directory: .mdtheme/company
+badges:
+  enabled: true
+  published: false
 ```
 
-For a local checkout, run `pnpm install` and `npm pack`, then install the
-resulting package tarball from the consumer project.
+All top-level fields are optional. Without a config, mdtheme uses `README.md.src`,
+`README.md`, no themes, and no badges. Discovery checks `mdtheme.yaml` and
+`mdtheme.yml` in the current directory. Having both is an error. Use
+`--config PATH` to select a config explicitly, including one in a subdirectory.
 
-## A project config
+Source and output live beside the config. `source` is a simple basename that
+starts with an ASCII letter or number and then uses letters, numbers, `.`, `_`,
+or `-`. `output` must be `README.md`. Unknown config fields are errors.
+Configuration contains data only; JavaScript and TypeScript configs are no
+longer supported.
 
-The config is ordinary trusted local TypeScript or JavaScript. It can import
-functions from files in the project and return the public `MarkdownFrame`
-values:
-
-```ts
-// mdtheme.config.ts
-import { defineConfig } from "mdtheme";
-import { noticeFrame } from "./themes.ts";
-
-export default defineConfig({
-  source: "README.md.src",
-  output: "README.md",
-  themes: [noticeFrame("Maintainer note")],
-});
-```
-
-`source` and `output` are paths relative to the config file. Both files must
-be in that directory, and `output` must be named `README.md`. If no config is
-selected explicitly, the CLI discovers one of these names in the current directory:
-
-```text
-mdtheme.config.ts
-mdtheme.config.mts
-mdtheme.config.js
-mdtheme.config.mjs
-```
-
-When no config is found, the CLI uses `README.md.src`, `README.md`, and no
-themes. Multiple discovered configs are an error. `--config PATH` selects one config
-explicitly. The config loader supports TypeScript on Node.js 24 and newer.
-The source basename is included in the generated notice and must use only a
-letter or number first, followed by letters, numbers, `.`, `_`, or `-`.
-Choose a simple source basename such as `README.md.src`.
-
-The config object has three fields:
-
-```ts
-type Config = {
-  source?: string;
-  output?: string;
-  themes: readonly MarkdownFrame[];
-};
-```
-
-Unknown fields are diagnosed. Use `defineConfig` for editor type checking and
-early validation.
+Local theme directories are relative to the config. A theme entry selects either
+`directory` or `git`; Git entries also accept `ref` and `path`. See
+[theme authoring](theme-authoring.md) for the format and remote behavior, and
+[project badges](badges.md) for the `badges` fields.
 
 ## Write and check
 
-Run the writer from the project directory:
+```sh
+mdtheme --write
+mdtheme --check
+```
+
+Write mode atomically replaces the output when it differs. An unchanged output
+is left alone. The source is never rewritten. Paths are validated before writing;
+source/output aliases and output symlinks are rejected.
+
+Source and frame text keep their original whitespace and line endings. The
+renderer adds a generated-file notice and LF blank-line boundaries between
+nonempty sections. It does not format Markdown or add a final newline.
+
+Check mode computes the same result and compares it with the output. It never
+writes the source or README. Both modes fetch configured Git themes into temporary
+directories outside the worktree and remove them afterward. A failed fetch is an
+error, even if the README was generated successfully on an earlier run.
+
+| Status | Meaning |
+| ---: | --- |
+| 0 | The requested operation succeeded; a check found current output. |
+| 1 | Check found missing or stale output, or pre-push blocked pending changes. |
+| 2 | Arguments, configuration, paths, Git access, or generation failed. |
+
+Errors are reported on stderr. See `mdtheme --help` for accepted commands.
+The [pre-push guide](pre-push.md) explains the additional Git checks.
+
+## Check in CI
+
+Install the chosen mdtheme revision in CI, then run `mdtheme --check` from the
+project directory. For example, a job that already has Rust and Git can build
+from a separate checkout of mdtheme:
 
 ```sh
-npx mdtheme --write
+cargo install --path /path/to/mdtheme-checkout --locked
+mdtheme --check
 ```
 
-The command reads the source, applies frames, and atomically updates the output. It validates paths before writing, including
-the source and output being the same file or hard link. The source remains
-untouched. Source and frame text retain their authored formatting, including
-line endings, indentation, and trailing whitespace. The tool adds a generated
-notice and blank lines between sections; it does not parse or format Markdown.
-If you use a formatter, run it on the source before generation. Formatting the
-generated output separately can make `--check` report drift.
+Replace the example path with that checkout's location. Use a reviewed mdtheme
+revision for the tool installation. Remote themes follow their configured ref:
+a moving branch can make a check fail without any project source change. Run
+`mdtheme --write`, review the new branding, and commit it to resolve that drift.
+Choose a commit hash in `ref` when you want the theme to remain fixed.
 
-Use check mode in CI and in a pre-merge check:
+## Compose text in Rust
 
-```sh
-npx mdtheme --check
-```
+The Rust library composes strings without reading files or fetching themes:
 
-Check mode never writes. Its exit statuses are:
+```rust
+use mdtheme::{Frame, render};
 
-| Status | Meaning                                                                      |
-| -----: | ---------------------------------------------------------------------------- |
-|      0 | The operation succeeded; in check mode, output matches the computed content. |
-|      1 | Check mode found output drift.                                               |
-|      2 | Arguments, config, paths, or input are invalid.                              |
-
-`--write` and `--check` each require exactly one operation. `--help` and
-`--version` are read-only informational commands.
-
-The generated output includes a static notice directing editors to the source.
-It contains no timestamp or network data, so the same source and config produce
-the same bytes.
-
-## Generate before pushing
-
-Use `mdtheme pre-push [--config PATH]` from a Git pre-push hook to regenerate
-from a clean checkout and block until the result is committed. The command
-returns 1 for a blocked push and 2 for an error. See [pre-push setup](pre-push.md)
-for installation, existing hooks, and the retry workflow. Keep `--check` in CI.
-
-## Direct API use
-
-For a build script that already has the source text, use the package root:
-
-```ts
-import { renderMarkdown } from "mdtheme";
-import type { MarkdownFrame } from "mdtheme";
-
-const frames: readonly MarkdownFrame[] = [{ opening: "<section>\n", closing: "\n</section>\n" }];
-
-const output = await renderMarkdown("# Hello\n", frames, {
-  sourceName: "README.md.src",
-});
-```
-
-This API accepts Markdown text and returns Markdown text. It does not read or
-write files and does not discover formatter configuration or arbitrary plugins.
-
-## Keeping React separate
-
-The package's contract is Markdown-only: themes are string factories and the
-renderer returns a string. A React site or component library can continue to
-own its own UI, CSS, and component rendering without being coupled to this
-package. If a project uses React, keep that code outside its Markdown frame
-factories.
-
-## A typical package script
-
-```json
-{
-  "scripts": {
-    "readme:write": "mdtheme --write",
-    "readme:check": "mdtheme --check"
-  }
+fn main() -> anyhow::Result<()> {
+    let frames = [Frame {
+        opening: "> Part of the Example project.\n".into(),
+        closing: "Questions? Open an issue.\n".into(),
+    }];
+    let markdown = render("# Example\n", &frames, "README.md.src")?;
+    println!("{markdown}");
+    Ok(())
 }
 ```
 
-Commit `README.md.src`, the config, the local factories, and the generated
-`README.md`. Review source changes and regenerate the output before committing.
+Until registry publication, use a local path dependency on a checkout of mdtheme.
+The example also needs `anyhow` in the consuming crate. `render` returns
+`anyhow::Result<String>` and validates the source name used in the notice.
+Frames are supplied outermost first and closed in reverse order.
+
+## Git line endings
+
+Generation preserves authored line endings and adds LF section boundaries.
+If Git converts your generated README on checkout, check mode can report drift.
+Keep its bytes unchanged with a `.gitattributes` rule such as `README.md -text`,
+or use `* text=auto eol=lf` when your repository standardizes text on LF.

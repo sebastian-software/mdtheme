@@ -21,7 +21,8 @@ body:
       placeholder: |
         version 1.2.3
         Linux 6.12
-        Node 24
+        mdtheme --version
+        git --version
     validations:
       required: true
 

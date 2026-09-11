@@ -11,8 +11,6 @@
 This source is ordinary Markdown. Edit it directly, then run
 `mdtheme --write` from this directory to produce `README.md`.
 
-The example uses two plain string factories so their nesting is easy to inspect.
-
-
+The example uses two local Markdown themes so their nesting is easy to inspect.
 
 </details>

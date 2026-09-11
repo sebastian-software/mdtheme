@@ -1,18 +1,18 @@
-# Support Node.js 24 and test Node.js 26
+# Support the native CLI across desktop and CI platforms
 
 - Status: accepted
-- Updated: 2026-09-10
+- Updated: 2026-09-11
 
-The CLI, library, and development toolchain require Node.js 24 or newer.
-CI runs the full checks, including the installed package consumer, on Node.js
-24 and 26. Release builds run on Node.js 24.
+The Rust port removes the Node runtime requirement. Build from source using the
+minimum Rust version declared in `Cargo.toml`. Installed binaries need no Rust
+or JavaScript runtime. Git is required for remote theme sources and pre-push
+checks; local Markdown generation does not require it.
 
-Node.js 22 support was considered during maintenance. Keeping Node.js 24 as
-the minimum avoids a separate runtime compatibility path and matches the
-standards toolchain's requirement. The cost is excluding consumers still on
-Node.js 22. Testing Node.js 26 catches compatibility problems before it becomes
-the project's development baseline.
+CI checks Linux, macOS, and Windows. Cross-platform tests cover the CLI and
+filesystem contracts as well as library behavior. Release artifact targets and
+distribution channels must be verified before they are advertised as available.
 
-Keep the engine requirement in `package.json` and the test matrix in
-the [CI workflow](../../.github/workflows/ci.yml). Revisit this decision when
-the supported runtime lines or development dependencies change.
+The earlier Node 24 minimum and Node 24/26 CI matrix applied to the TypeScript
+implementation. This living record keeps its original path so existing links
+remain valid. Git history preserves that runtime decision. See the
+[native migration decision](0009-native-cli-and-data-only-themes.md).

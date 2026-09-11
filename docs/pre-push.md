@@ -4,42 +4,31 @@ Use `mdtheme pre-push` to regenerate your README during a Git push and require
 a clean, committed result. It uses the same config and generation rules as
 `--write`.
 
-The command requires Node.js 24 or newer, Git on PATH, and a worktree with at
-least one commit. Install mdtheme as a project dependency first:
+The command requires the native mdtheme binary and Git on PATH, plus a worktree
+with at least one commit. Follow the [source installation instructions](../README.md#get-started)
+first. No project package manifest is needed.
+
+## Try the command
 
 ```sh
-npm install --save-dev mdtheme
+mdtheme pre-push
 ```
 
-## Add the command
-
-Add a script to your project's `package.json`:
-
-```json
-{
-  "scripts": {
-    "readme:write": "mdtheme --write",
-    "readme:check": "mdtheme --check",
-    "readme:pre-push": "mdtheme pre-push"
-  }
-}
-```
-
-Run `npm run readme:pre-push` to try it manually. For a README in a subdirectory,
-use `mdtheme pre-push --config docs/mdtheme.config.ts` in the script.
-The config, source, and output must belong to the current Git worktree.
+For a README in a subdirectory, use
+`mdtheme pre-push --config docs/mdtheme.yaml`. The config, source, and output
+must belong to the current Git worktree.
 
 ## Connect it to Git
 
 If your project already uses a hook manager or a pre-push hook, add
-`npm run --silent readme:pre-push` to that hook and propagate its failure.
+`mdtheme pre-push` to that hook and propagate its failure.
 Keep the existing checks. Do not forward Git's remote arguments to mdtheme.
 
 For a project without existing hooks, create `.githooks/pre-push`:
 
 ```sh
 #!/bin/sh
-exec npm run --silent readme:pre-push
+exec mdtheme pre-push
 ```
 
 Make it executable and enable the hook directory for your local clone:
@@ -50,13 +39,13 @@ git config --local core.hooksPath .githooks
 ```
 
 Check `git config --get core.hooksPath` before changing it: selecting a new
-directory replaces the hook location Git uses. Commit the hook, package files,
-source, config, and generated README. Each contributor enables the hook
-directory after cloning and installs dependencies. mdtheme does not install
-hooks automatically.
+directory replaces the hook location Git uses. Commit the hook, source, config,
+local themes, and generated README. Each contributor enables the hook directory
+after cloning and installs mdtheme. mdtheme does not install hooks automatically.
 
-Git runs the hook from the worktree root. The script uses the installed local
-package through npm; it does not download a CLI during a push.
+Git runs the hook from the worktree root. The script uses `mdtheme` on PATH.
+Configured remote themes are fetched once the initial worktree check passes;
+the hook does not install the CLI.
 
 ## What happens during a push
 
@@ -71,12 +60,13 @@ package through npm; it does not download a CLI during a push.
 
 After a blocked push, inspect `git diff` and `git status`, commit the changes
 you want to keep, then push again. mdtheme never stages, commits, or pushes.
-To avoid a second commit, run `npm run readme:write` before your initial commit.
+To avoid a second commit, run `mdtheme --write` before your initial commit.
 
 The source, selected config, and output must be tracked. Other ignored files,
-such as `node_modules` and build caches, do not count as pending changes.
-Commit local theme factories and the metadata they read as part of your normal
-project workflow. Configs remain trusted executable code.
+such as build caches, do not count as pending changes.
+Commit local theme files and package metadata as part of your normal project
+workflow. YAML configs and themes contain data only. An unavailable remote
+theme stops generation with status 2.
 
 | Status | Meaning                                                                              |
 | -----: | ------------------------------------------------------------------------------------ |

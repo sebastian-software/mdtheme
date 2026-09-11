@@ -24,5 +24,9 @@ commit.
 
 Document manual setup, integration with existing hooks, exit statuses, and the
 review-and-commit retry workflow. Verify behavior in temporary repositories and
-with a real pre-push hook using the packed CLI. Revisit the scope only if users
+with a real pre-push hook using the packaged native CLI. Revisit the scope only if users
 need validation of arbitrary outgoing refs or several README configs per push.
+
+The hook calls `mdtheme pre-push` directly from PATH. It needs no npm manifest
+or hook manager. Remote themes are fetched only after the initial clean-worktree
+check. Fetch failures stop the operation; there is no stale theme fallback.

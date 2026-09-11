@@ -1,0 +1,6 @@
+themes:
+  - directory: .mdtheme/company
+badges:
+  enabled: true
+  published: false
+  workflow: ci.yml

@@ -1,0 +1,28 @@
+[package]
+name = "mdtheme"
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.96"
+description = "Compose Markdown with reusable local and Git themes."
+license = "MIT"
+repository = "https://github.com/sebastian-software/mdtheme"
+readme = "README.md"
+include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/docs/**", "/examples/**", "/tests/**"]
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml_ng = "0.10"
+toml = "1"
+glob = "0.3"
+tempfile = "3"
+same-file = "1"
+
+[workspace]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[lints]
+workspace = true
