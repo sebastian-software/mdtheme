@@ -2,6 +2,7 @@
 
 Requires mise on PATH. Downloads the pinned release during explicit setup only.
 """
+import json
 import os
 from pathlib import Path
 import shutil
@@ -43,6 +44,8 @@ class ProjectToolsTest(unittest.TestCase):
         result = cls.run_mise('install', '--locked')
         if result.returncode:
             raise RuntimeError(result.stdout + result.stderr)
+        versions = cls.run_mise('ls', '--json')
+        cls.version = json.loads(versions.stdout)['github:sebastian-software/mdtheme'][0]['version']
 
     @classmethod
     def run_mise(cls, *args, project=None, extra=None):
@@ -81,13 +84,13 @@ class ProjectToolsTest(unittest.TestCase):
     def test_other_project_cannot_use_installed_wrong_version(self):
         other = self.root / 'other-project'
         other.mkdir(exist_ok=True)
-        config = (self.project / 'mise.toml').read_text().replace('version = "0.3.1"', 'version = "0.3.0"')
+        config = (self.project / 'mise.toml').read_text().replace(f'version = "{self.version}"', 'version = "0.0.0"')
         (other / 'mise.toml').write_text(config)
         result = self.run_mise('run', 'readme:check', project=other, extra={'MISE_OFFLINE': 'true'})
         self.assertNotEqual(result.returncode, 0, result.stderr)
         result = self.run_mise('which', 'mdtheme', extra={'MISE_OFFLINE': 'true'})
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('0.3.1', result.stdout)
+        self.assertIn(self.version, result.stdout)
 
     def test_wrong_archive_checksum_is_rejected(self):
         import re
