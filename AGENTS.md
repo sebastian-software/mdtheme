@@ -9,7 +9,7 @@ the generated README, and an installed Cargo package. Run cargo deny check
 when dependencies change. Cargo.toml declares the minimum Rust version.
 
 Edit README.md.src and run cargo run -- --write. Configuration is mdtheme.yaml.
-Themes contain header.md/footer.md; Git sources default to main and refresh
+Themes contain header/footer and optional badge fragments; Git sources default to main and refresh
 on every invocation. Never execute theme code or mutate source files.
 Check mode never writes project files. Pre-push never stages or commits.
 
@@ -17,9 +17,9 @@ Historical JavaScript Git revisions retain their dist files; new revisions
 build from Cargo sources. Keep the package free of browser dependencies and
 speculative plugin APIs. Package changes require an installed-consumer check.
 
-Standards 13's mdtheme checker still requires npm scripts and TypeScript
-configs. docs/standards-integration.md records that external incompatibility.
-Do not reintroduce Node files to satisfy the obsolete integration check.
+Standards 0.11+ recognizes native YAML README ownership. Keep the CLI pin
+project-owned in mise.toml and mise.lock; never add Node files solely to run
+README generation. docs/standards-integration.md records the contract.
 
 ---
 

@@ -35,7 +35,7 @@ assets; they are served from the same GitHub release as the archives.
 Choose a version and directory explicitly for a reproducible installation:
 
 ```sh
-sh install-mdtheme.sh --version 0.3.1 --bin-dir "$HOME/.local/bin"
+sh install-mdtheme.sh --version 0.4.0 --bin-dir "$HOME/.local/bin"
 ```
 
 Run the installer again to update. Remove `~/.local/bin/mdtheme` to uninstall.
@@ -56,7 +56,7 @@ ARCHIVE` extracts the binary.
 With Rust and Cargo installed, build a reviewed release:
 
 ```sh
-cargo install --git https://github.com/sebastian-software/mdtheme --tag mdtheme-v0.3.1 --locked
+cargo install --git https://github.com/sebastian-software/mdtheme --tag mdtheme-v0.4.0 --locked
 ```
 
 Or run `cargo install --path . --locked` from a checkout. Cargo installs into its
@@ -71,7 +71,7 @@ Pin both the installer and binary version in CI:
 ```yaml
 - name: Install mdtheme
   env:
-    MDTHEME_VERSION: 0.3.1
+    MDTHEME_VERSION: 0.4.0
   run: |
     curl -fsSL "https://github.com/sebastian-software/mdtheme/releases/download/mdtheme-v$MDTHEME_VERSION/install.sh" -o "$RUNNER_TEMP/install-mdtheme.sh"
     sh "$RUNNER_TEMP/install-mdtheme.sh" --version "$MDTHEME_VERSION" --bin-dir "$HOME/.local/bin"

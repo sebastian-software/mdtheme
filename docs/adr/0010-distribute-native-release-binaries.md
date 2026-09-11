@@ -47,14 +47,17 @@ The inspected repositories use exact CI pins but do not establish an existing
 shared local tool manager. mise introduces a setup dependency, but could avoid
 maintaining our own platform selection, cache, and version resolver.
 
-The scoped pilot is accepted; organization-wide adoption remains undecided.
+The scoped pilot is accepted and adopted by the Ferramenta family projects.
 The pilot must prove platform selection, checksum verification, concurrent project
 versions, and failure without downloads or global fallback. The mdtheme source
 repository must retain Cargo checks for the current code even if a released CLI
 is used to generate its README. See the
-[standards integration proposal](../standards-integration.md#project-version-proposal)
-for evidence, boundaries, and acceptance criteria.
+[historical standards integration proposal](https://github.com/sebastian-software/mdtheme/blob/ecf62ed/docs/standards-integration.md#project-version-proposal)
+for the original evidence, boundaries, and acceptance criteria. The current
+[standards integration](../standards-integration.md) records native ownership.
 
 The executable pilot is documented in [project tools](../project-tools.md).
-Its source-build gate remains independent of the released CLI pin. Successful
-two-release coexistence is still pending a second usable native release.
+Its source-build gate remains independent of the released CLI pin. On 2026-09-11, published releases 0.3.1 and 0.4.0 resolved independently
+and ran offline in the same mise data directory. All five 0.4.0 platform locks
+matched the published SHA256SUMS; the macOS ARM64 binary was installed and
+executed locally. CI builds the other release platforms.

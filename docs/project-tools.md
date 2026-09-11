@@ -15,7 +15,7 @@ tool installation and fallback for the whole project, including other mise tools
 
 ```toml
 [tools."github:sebastian-software/mdtheme"]
-version = "0.3.1"
+version = "0.4.0"
 version_prefix = "mdtheme-v"
 
 [settings]
