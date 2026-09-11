@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.3.0...mdtheme-v0.3.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* match the native CLI version in pinned installations ([#10](https://github.com/sebastian-software/mdtheme/issues/10)) ([815df39](https://github.com/sebastian-software/mdtheme/commit/815df39f58bc8ea10bd1762b9d5880d87bbe2456))
+
 ## [0.3.0](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.2.0...mdtheme-v0.3.0) (2026-09-11)
 
 
