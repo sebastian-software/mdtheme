@@ -18,6 +18,9 @@ For a README in a subdirectory, use
 `mdtheme pre-push --config docs/mdtheme.yaml`. The config, source, and output
 must belong to the current Git worktree.
 
+For projects using the [mise pilot](project-tools.md), use
+`mise run readme:pre-push` so the hook selects the project version.
+
 ## Connect it to Git
 
 If your project already uses a hook manager or a pre-push hook, add

@@ -25,6 +25,10 @@ configuration files.
 
 ## README generation
 
+The [project tool pilot](project-tools.md) provides version-pinned README tasks
+for local use and CI. The Cargo commands below continue to validate the current
+source implementation.
+
 The editable project corpus is `README.md.src`. The YAML config selects the
 local company theme. After changing either, run:
 
