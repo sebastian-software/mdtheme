@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.2.0...mdtheme-v0.3.0) (2026-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to a native Rust CLI with YAML and Git themes ([#7](https://github.com/sebastian-software/mdtheme/issues/7))
+
+### Features
+
+* distribute native releases with a verified installer ([#9](https://github.com/sebastian-software/mdtheme/issues/9)) ([48e4799](https://github.com/sebastian-software/mdtheme/commit/48e47994a6b633058f818bb110dd22856b12dfe8))
+* migrate to a native Rust CLI with YAML and Git themes ([#7](https://github.com/sebastian-software/mdtheme/issues/7)) ([1dc08ba](https://github.com/sebastian-software/mdtheme/commit/1dc08babdcc24fe5df27d1389099995b03bafe07))
+
 ## [0.2.0](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.1.1...mdtheme-v0.2.0) (2026-09-10)
 
 
