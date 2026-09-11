@@ -1,7 +1,7 @@
 # Usage
 
 `mdtheme` keeps authored Markdown separate from the generated README. Install
-the native CLI from source as described in the [README](../README.md#get-started).
+the native CLI with [Homebrew, the installer, or Cargo](installation.md).
 Git is required for remote themes and `pre-push`. Local generation needs only
 the installed binary; no Node runtime or project `package.json` is required.
 
@@ -66,17 +66,8 @@ The [pre-push guide](pre-push.md) explains the additional Git checks.
 
 ## Check in CI
 
-Install the chosen mdtheme revision in CI, then run `mdtheme --check` from the
-project directory. For example, a job that already has Rust and Git can build
-from a separate checkout of mdtheme:
-
-```sh
-cargo install --path /path/to/mdtheme-checkout --locked
-mdtheme --check
-```
-
-Replace the example path with that checkout's location. Use a reviewed mdtheme
-revision for the tool installation. Remote themes follow their configured ref:
+Install a pinned mdtheme version with the [GitHub Actions example](installation.md#github-actions),
+then run `mdtheme --check` from the project directory. Remote themes follow their configured ref:
 a moving branch can make a check fail without any project source change. Run
 `mdtheme --write`, review the new branding, and commit it to resolve that drift.
 Choose a commit hash in `ref` when you want the theme to remain fixed.

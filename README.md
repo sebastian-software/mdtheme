@@ -20,16 +20,14 @@ Node, or other projects without adding a JavaScript runtime or package manifest.
 
 ## Get started
 
-The native implementation is currently available from source. With Rust and
-Cargo installed, run this command from a checkout of this repository:
+Install with Homebrew:
 
 ```sh
-cargo install --path . --locked
+brew install sebastian-software/tap/mdtheme
 ```
 
-This installs `mdtheme` in Cargo's binary directory. Add that directory to your
-PATH if needed. crates.io packages, Homebrew installation, and downloadable
-release binaries are not available yet.
+Or use the [shell installer, release archives, or Cargo from source](docs/installation.md).
+The native binary works without Node or Rust installed.
 
 In your project, create `README.md.src` with your content. If you already have
 a README, copy its content into the source file first. Generate and check it:
@@ -102,6 +100,7 @@ The [repository config](mdtheme.yaml) selects a local company frame;
 
 ## More documentation
 
+- [Installation](docs/installation.md)
 - [Usage and CI](docs/usage.md)
 - [Pre-push setup](docs/pre-push.md)
 - [Theme authoring and Git sources](docs/theme-authoring.md)
