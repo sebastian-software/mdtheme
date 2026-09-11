@@ -8,5 +8,7 @@
       "changelog-path": "CHANGELOG.md"
     }
   },
-  "bootstrap-sha": "27c3b96634f919e0c7167f2adc7664c0f8299991"
+  "bootstrap-sha": "27c3b96634f919e0c7167f2adc7664c0f8299991",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true
 }

@@ -113,7 +113,8 @@ jobs:
       - name: Generate checksums and Homebrew formula
         run: |
           cd artifact
-          sha256sum *.tar.gz > SHA256SUMS
+          cp ../install.sh .
+          sha256sum *.tar.gz install.sh > SHA256SUMS
           python3 ../scripts/homebrew-formula.py "$RELEASE_TAG" > mdtheme.rb
       - name: Upload release assets
         run: gh release upload "$RELEASE_TAG" artifact/* --clobber

@@ -23,6 +23,9 @@ jobs:
       - name: Verify native CLI and packaged consumer
         shell: bash
         run: sh scripts/check.sh
+      - name: Test installer
+        if: runner.os != 'Windows'
+        run: python3 scripts/test-installer.py
 
   msrv:
     runs-on: ubuntu-latest

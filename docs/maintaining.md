@@ -39,16 +39,20 @@ files change.
 
 ## Distribution
 
-The native port can be installed from source with `cargo install --path . --locked`.
-The native release workflow uses Release Please and builds binaries for Linux,
-macOS, and Windows. It also prepares checksums and a Homebrew formula artifact.
-These paths are not published or verified yet; a generated formula does not by
-itself make `brew install mdtheme` available.
+Release Please prepares releases below 1.0: breaking changes bump the minor
+version and other features bump the patch version. Merge the release PR after
+reviewing its version, changelog, and Cargo lockfile. The publish workflow builds
+five target archives, checksums, an installer, and a Homebrew formula. The tap's
+update workflow installs and tests the formula before committing it.
 
-Cargo publication is an explicit manual workflow choice through
-`publish_crate=true` and requires `CARGO_REGISTRY_TOKEN`. Credentials and registry
-publication have not been verified. Do not advertise registry installation or
-release downloads until the artifacts and installation paths have been checked.
+If artifact publication fails, rerun `publish` manually with the existing tag.
+Do not move a published tag. Keep the installer and formula archive names in
+sync with the build matrix. Run `python3 scripts/test-installer.py` when changing
+installation behavior; CI runs those tests on macOS and Linux.
+
+Cargo publication is a separate manual workflow choice through
+`publish_crate=true` and requires `CARGO_REGISTRY_TOKEN`. Registry authorization
+has not been configured. GitHub downloads and Homebrew do not depend on it.
 
 Historical npm packages remain JavaScript products. The Rust CLI replaces that
 implementation rather than publishing a native release through the old npm

@@ -24,3 +24,18 @@ README ownership check still expects an npm dependency and a TypeScript config.
 It does not recognize the native YAML setup yet. That upstream incompatibility
 remains unresolved; the repository gate uses Cargo and mdtheme's own README
 check rather than claiming standards consistency passes.
+
+## Native installation contract
+
+Install mdtheme independently of the consuming project's package manager. Local
+users can use the shared Homebrew tap; CI can run the version-pinned shell
+installer from [the installation guide](installation.md#github-actions).
+`standards` should validate YAML ownership and invoke `mdtheme --check` from PATH;
+it should not silently download tools during `standards check` or create a Node
+manifest in a Rust repository. Tool installation belongs in an explicit setup
+step, while `standards apply` may seed the YAML config and CI step.
+
+This is the intended upstream integration, not an available standards feature.
+The current upstream main branch does not include the earlier Markdown ownership
+bridge. Coordinate that bridge and the native YAML contract before enabling the
+standards ownership gate here. The native CLI's own check remains authoritative.

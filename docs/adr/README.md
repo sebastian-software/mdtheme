@@ -21,3 +21,4 @@ configuration files; ADRs explain the constraints and tradeoffs behind them.
 - [Standard project badges](0007-use-a-fixed-project-badge-set.md)
 - [Local pre-push generation](0008-guard-pushes-with-local-readme-generation.md)
 - [Native CLI, YAML configuration, and Git themes](0009-native-cli-and-data-only-themes.md)
+- [Native distribution and installation](0010-distribute-native-release-binaries.md)
