@@ -16,7 +16,8 @@ before replacing an installation. It does not use sudo or edit shell profiles.
 CI examples pin a version. The tap verifies its formula through an actual install.
 
 Keep the project below 1.0 while its contracts are still developing. Breaking
-changes advance the minor version. The Rust/YAML migration is release 0.3.0.
+changes advance the minor version. The first installable Rust/YAML release is
+0.3.1. Release 0.3.0 was held back after a version-output mismatch was found in its installer; its tag stays intact.
 
 ## Rationale and consequences
 
