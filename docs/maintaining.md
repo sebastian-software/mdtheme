@@ -47,8 +47,9 @@ update workflow installs and tests the formula before committing it.
 
 If artifact publication fails, rerun `publish` manually with the existing tag.
 Do not move a published tag. Keep the installer and formula archive names in
-sync with the build matrix. Run `python3 scripts/test-installer.py` when changing
-installation behavior; CI runs those tests on macOS and Linux.
+sync with the build matrix. Run `cargo build --locked` followed by
+`python3 scripts/test-installer.py` when changing installation behavior. The
+suite exercises the built CLI; CI runs it on macOS and Linux after the build.
 
 Cargo publication is a separate manual workflow choice through
 `publish_crate=true` and requires `CARGO_REGISTRY_TOKEN`. Registry authorization
