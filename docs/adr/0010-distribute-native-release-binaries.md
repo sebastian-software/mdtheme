@@ -1,7 +1,7 @@
 # Distribute native release binaries
 
 Status: accepted  
-Updated: 2026-09-11
+Updated: 2026-11-10
 
 ## Decision
 
@@ -26,8 +26,8 @@ Node configuration or compiling the CLI. Release archives are platform-specific;
 unsupported platforms can build from source. Checksums share the release's trust
 boundary and do not provide independent signing.
 
-Standards does not bundle mdtheme or choose one CLI version for every consumer.
-Each project owns an exact tool version, independent of its standards version.
+Shared infrastructure guidance does not bundle mdtheme or choose one CLI version
+for every consumer. Each project owns an exact tool version.
 Installations for different versions coexist outside the repository. Local
 checks, pre-push, and CI must resolve the project's version explicitly; an
 arbitrary global binary on PATH does not satisfy that contract.
@@ -35,8 +35,8 @@ arbitrary global binary on PATH does not satisfy that contract.
 Tool installation is an explicit setup operation. Checks must fail on a missing
 or mismatched version without installing a replacement or falling back to a
 system binary. A tool manager owns downloading, version storage, and resolution;
-standards owns repository conventions and validation. YAML ownership and setup
-seeding still need an upstream standards change.
+the project owns its repository conventions and validation. Shared guidance
+lives in project-infra; no metadata stamp or standards CLI is required.
 
 ## Accepted implementation: scoped mise pilot
 
@@ -61,3 +61,8 @@ Its source-build gate remains independent of the released CLI pin. On 2026-09-11
 and ran offline in the same mise data directory. All five 0.4.0 platform locks
 matched the published SHA256SUMS; the macOS ARM64 binary was installed and
 executed locally. CI builds the other release platforms.
+
+## Amendment log
+
+- 2026-11-10: Retired standards CLI ownership and the metadata stamp while
+  preserving project-owned mise pins, README generation, and native checks.

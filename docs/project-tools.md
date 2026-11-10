@@ -103,7 +103,7 @@ mise run readme:check
 ```
 
 Review the version, URLs, and checksums and commit both tool files together.
-A standards upgrade must preserve this project-owned pin. The mise version
+An infrastructure update must preserve this project-owned pin. The mise version
 itself is independently pinned in CI; updating it requires rerunning the pilot
 checks before changing the supported setup.
 
