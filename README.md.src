@@ -36,6 +36,12 @@ mise install --locked
 
 The tasks use Bash; on Windows, use Git Bash. For a standalone installation,
 see [Homebrew, the shell installer, and release downloads](docs/installation.md).
+New native releases include GitHub build attestations. After downloading an
+archive, verify its provenance before extracting it:
+
+```sh
+gh attestation verify mdtheme-aarch64-apple-darwin.tar.gz --repo sebastian-software/mdtheme
+```
 
 ### 2. Add your content and theme
 

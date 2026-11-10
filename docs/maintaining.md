@@ -52,7 +52,7 @@ reviewing its version, changelog, and Cargo lockfile. The publish workflow build
 five target archives, checksums, an installer, and a Homebrew formula. The tap's
 update workflow installs and tests the formula before committing it.
 
-If artifact publication fails, rerun `publish` manually with the existing tag.
+If artifact publication fails, follow the draft retry procedure below.
 Do not move a published tag. Keep the installer and formula archive names in
 sync with the build matrix. Run `cargo build --locked` followed by
 `python3 scripts/test-installer.py` when changing installation behavior. The
@@ -66,3 +66,17 @@ Historical npm packages remain JavaScript products. The Rust CLI replaces that
 implementation rather than publishing a native release through the old npm
 workflow. See the [migration guide](migration.md) for user-facing changes and
 [standards integration](standards-integration.md) for the removed Node tooling.
+
+## Retry a draft release
+
+Release Please creates a draft and its tag before the native build starts.
+The workflow attests and verifies the complete asset set before publishing the
+immutable release. To retry an unfinished draft, run the workflow from that same
+tag so workflow and build source identities match:
+
+```sh
+gh workflow run publish.yml --ref mdtheme-vX.Y.Z -f tag=mdtheme-vX.Y.Z
+```
+
+Retries replace only known draft assets. Published releases are final; their
+assets and tags are never replaced.
