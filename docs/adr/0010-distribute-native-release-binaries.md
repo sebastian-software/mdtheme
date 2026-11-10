@@ -5,6 +5,14 @@ Updated: 2026-11-10
 
 ## Decision
 
+Create the release as a draft with its tag before building native archives.
+Attest the five archives, installer, and formula with GitHub build provenance,
+then upload and verify the complete asset set before publishing. Publication
+locks the immutable release. A retry can replace known assets only while the
+release remains a draft; it rejects published releases and unexpected assets.
+Run manual retries from the release tag so workflow and build source identities
+match. The tag is created once by Release Please and never moved.
+
 Publish native archives and SHA-256 checksums on GitHub Releases. Offer the
 existing Sebastian Software Homebrew tap and a shell installer for macOS and
 Linux. Keep source installation through Cargo available; enable crates.io only
@@ -24,7 +32,8 @@ changes advance the minor version. The first installable Rust/YAML release is
 Repositories using Rust or other languages can consume mdtheme without adding
 Node configuration or compiling the CLI. Release archives are platform-specific;
 unsupported platforms can build from source. Checksums share the release's trust
-boundary and do not provide independent signing.
+boundary and do not provide independent signing. GitHub artifact attestations
+provide the separate workflow provenance check.
 
 Shared infrastructure guidance does not bundle mdtheme or choose one CLI version
 for every consumer. Each project owns an exact tool version.

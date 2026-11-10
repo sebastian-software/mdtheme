@@ -23,6 +23,8 @@ jobs:
       - name: Verify native CLI and packaged consumer
         shell: bash
         run: sh scripts/check.sh
+      - name: Test draft release lifecycle
+        run: python3 scripts/test-release-assets.py
       - name: Test installer
         if: runner.os != 'Windows'
         run: python3 scripts/test-installer.py
