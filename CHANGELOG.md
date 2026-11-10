@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.4.0...mdtheme-v0.4.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* **release:** finish and attest draft assets before publication ([#27](https://github.com/sebastian-software/mdtheme/issues/27)) ([74e9b8d](https://github.com/sebastian-software/mdtheme/commit/74e9b8d3a635c6d27c8b5dd900437a58c36b81f9))
+
 ## [0.4.0](https://github.com/sebastian-software/mdtheme/compare/mdtheme-v0.3.1...mdtheme-v0.4.0) (2026-09-11)
 
 
